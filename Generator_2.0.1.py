@@ -11,9 +11,6 @@ card.title("INCAR Generator")
 card.resizable(0,0)
 
 Desktop_directory = os.environ['USERPROFILE']  + "\Desktop"
-incar_file = Desktop_directory + "\INCAR"
-poscar_file = Desktop_directory + "\POSCAR"
-kpoints_file = Desktop_directory + "\KPOINTS"
 Recent_used_directory=Desktop_directory
 
 def apply_incar_value():
