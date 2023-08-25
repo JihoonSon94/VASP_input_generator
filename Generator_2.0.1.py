@@ -433,6 +433,8 @@ shell_btn.place(width = 100, height = 30, x = 620, y = 50)
 
 
 
+
+
 Make_all_btn = Button(text = "Make All", command = make_all)
 Make_all_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
 Make_all_btn.place(width = 120, height = 30, x = 620, y = 720)
