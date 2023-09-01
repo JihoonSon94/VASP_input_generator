@@ -151,7 +151,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "\n")
     else:
         text1.insert(CURRENT, "#DOS\n")
-        text1.insert(CURRENT, "ISMEAR  = -5\n")
+        text1.insert(CURRENT, "ISMEAR  = 0\n")
         text1.insert(CURRENT, "SIGMA   = 0.05\n")
         text1.insert(CURRENT, "\n")
 
