@@ -1,1 +1,1 @@
-# VASP_input_generator
+# VASP_Input_Generator
