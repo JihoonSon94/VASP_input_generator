@@ -10,7 +10,7 @@ card.geometry("750x760+500+100")
 card.title("INCAR Generator")
 card.resizable(0,0)
 
-Desktop_directory = os.environ['USERPROFILE']  + "\Desktop"
+Desktop_directory = os.getcwd()
 Recent_used_directory=Desktop_directory
 
 def apply_incar_value():
@@ -20,10 +20,10 @@ def apply_incar_value():
     text1.insert(CURRENT, "#General\n")
     text1.insert(CURRENT, "PREC    = Accurate\n")
     text1.insert(CURRENT, "SYMPREC = 1E-8\n")
-    if combobox_calculation_type.get() == "Solvation":
+    if combobox2.get() == "Solvation":
         text1.insert(CURRENT, "ISTART  = 1\n")
         text1.insert(CURRENT, "ICHARG  = 2\n")
-    elif combobox_calculation_type.get() == "HSE":
+    elif combobox2.get() == "HSE":
         text1.insert(CURRENT, "ISTART  = 1\n")
         text1.insert(CURRENT, "ICHARG  = 11\n")
     else:
@@ -34,24 +34,13 @@ def apply_incar_value():
 
     #################### Write flags ####################
     text1.insert(CURRENT, "#Write flags\n")
-    if combobox_calculation_type.get() == "Single Point" or combobox_calculation_type.get() == "Vibration" or \
-        combobox_calculation_type.get() == "DOS" or combobox_calculation_type.get() == "HSE":
+    if combobox2.get() == "Single Point" or combobox2.get() == "Vibration" or combobox2.get() == "DOS" or combobox2.get() == "HSE":
         text1.insert(CURRENT, "LORBIT  = 11\n")
     else:
         pass
 
-    if combobox_calculation_type.get() == "Single Point":
-        text1.insert(CURRENT, "LWAVE   = .TRUE.\n")
-        text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
-    elif combobox_calculation_type.get() == "Solvation":
-        text1.insert(CURRENT, "LWAVE   = .FALSE.\n")
-        text1.insert(CURRENT, "LCHARG  = .FALSE.\n")
-    elif combobox_calculation_type.get() == "Charge":
-        text1.insert(CURRENT, "LWAVE   = .FALSE.\n")
-        text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
+    if combobox2.get() == "Single Point":
         text1.insert(CURRENT, "LVHAR   = .TRUE.\n")
-        text1.insert(CURRENT, "LAECHG  = .TRUE.\n")
-    elif combobox_calculation_type.get() == "DOS":
         text1.insert(CURRENT, "LWAVE   = .TRUE.\n")
         text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
     else:
@@ -94,7 +83,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "\n")
 
     #################### Solvation Correction ####################
-    if combobox_calculation_type.get() == "Solvation":
+    if combobox2.get() == "Solvation":
         text1.insert(CURRENT, "#Solvation Correction\n")
         text1.insert(CURRENT, "LSOL    = .TRUE.\n")
         text1.insert(CURRENT, "TAU     = 0\n")
@@ -104,17 +93,15 @@ def apply_incar_value():
     
     #################### Electronic Relaxation ####################
     text1.insert(CURRENT, "#Electronic Relaxation\n")
-    if combobox_calculation_type.get() == "HSE":
+    if combobox2.get() == "HSE":
         pass
     else:
-        text1.insert(CURRENT, "IALGO   = 48\n")
-
+        text1.insert(CURRENT, "ALGO    = FAST\n")
     text1.insert(CURRENT, "ENCUT   = " + str(combobox4.get()) + "\n")
     text1.insert(CURRENT, "EDIFF   = 1E-7\n")
     text1.insert(CURRENT, "NELM    = 300\n")
     text1.insert(CURRENT, "LREAL   = Auto\n")
-
-    if combobox_calculation_type.get() == "Vibration":
+    if combobox2.get() == "Vibration":
         text1.insert(CURRENT, "MAXMIX  = 60\n")
         text1.insert(CURRENT, "\n")
     else:
@@ -122,7 +109,7 @@ def apply_incar_value():
 
     #################### Ionic Relaxation ####################
     text1.insert(CURRENT, "#Ionic Relaxation\n")
-    if combobox_calculation_type.get() == "Relaxation":
+    if combobox2.get() == "Relaxation":
         text1.insert(CURRENT, "IBRION  = 2\n")
         text1.insert(CURRENT, "NSW     = 1000\n")
         text1.insert(CURRENT, "POTIM   = 0.5\n")
@@ -133,7 +120,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "EDIFFG  = 1E-6\n")
         text1.insert(CURRENT, "ISYM    = 0\n")
         text1.insert(CURRENT, "\n")
-    elif combobox_calculation_type.get() == "Vibration":
+    elif combobox2.get() == "Vibration":
         text1.insert(CURRENT, "IBRION  = 5\n")
         text1.insert(CURRENT, "NSW     = 1000\n")
         text1.insert(CURRENT, "POTIM   = 0.015\n")
@@ -148,7 +135,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "\n")
 
     #################### HSE ####################
-    if combobox_calculation_type.get() == "HSE":
+    if combobox2.get() == "HSE":
         text1.insert(CURRENT, "#HSE06\n")
         text1.insert(CURRENT, "LHFCALC  = .TURE.\n")
         text1.insert(CURRENT, "HFSCREEN = 0.2\n")
@@ -157,7 +144,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "\n")
 
     #################### DOS ####################
-    if combobox_calculation_type.get() == "DOS":
+    if combobox2.get() == "DOS":
         text1.insert(CURRENT, "#DOS\n")
         text1.insert(CURRENT, "ISMEAR  = -5\n")
         text1.insert(CURRENT, "SIGMA   = 0.05\n")
@@ -175,8 +162,8 @@ def apply_incar_value():
 
 def read_poscar():
     global Recent_used_directory
-    filename = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=(("vasp files", "*.vasp")\
-        ,("all files","*.*")))
+    filename = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=(("vasp files",("*CONTCAR*", "*POSCAR*"))\
+        ,("all files","*")))
     
     if filename:
         Recent_used_directory= "/".join(filename.split("/")[:-1])
@@ -303,18 +290,6 @@ def write_kpoints():
     
     text3.insert(CURRENT, "   0   0   0\n")
 
-def make_shell():
-    shell_text.insert(CURRENT, "#!/bin/bash\n")
-    shell_text.insert(CURRENT, "#PBS -N\n")
-    shell_text.insert(CURRENT, "#PBS -q batch\n")
-    shell_text.insert(CURRENT, "#PBS -l nodes=1:ppn=32\n")
-    shell_text.insert(CURRENT, "#PBS -l walltime=10000:00:00\n")
-    shell_text.insert(CURRENT, "#PBS -A vasp\n")
-    shell_text.insert(CURRENT, "\n")
-    shell_text.insert(CURRENT, "cd $PBS_O_WORKDIR\n")
-    shell_text.insert(CURRENT, "mpirun /appl/programs/vasp/vasp.5.4.4/bin/vasp_std > log\n")
-    shell_text.insert(CURRENT, "\n")
-    shell_text.insert(CURRENT, "exit 0\n")
 
 def make_all():
     Save_path=filedialog.askdirectory(initialdir=Recent_used_directory)
@@ -327,9 +302,6 @@ def make_all():
     OUT = open(Save_path+"\KPOINTS",'w',newline='\n')
     OUT.write(text3.get(1.0, END))
     OUT.close()
-    OUT = open(Save_path+"\shell",'w',newline='\n')
-    OUT.write(shell_text.get(1.0, END))
-    OUT.close()
 
 # Tab Configuration
 notebook = ttk.Notebook(card, width = 730, height = 680)
@@ -341,8 +313,6 @@ tab2 = Frame(card)
 notebook.add(tab2, text = "POSCAR")
 tab3 = Frame(card)
 notebook.add(tab3, text = "KPOINTS")
-tab4 = Frame(card)
-notebook.add(tab4, text = "shell")
 
 ############## First Tab - INCAR ##############
 ## Text box
@@ -359,9 +329,9 @@ combobox1.place(width = 100, height = 25, x = 620, y = 10)
 ## Calculation Type
 label2 = Label(tab1, text="Calculation Type :", relief="flat", anchor="w")
 label2.place(width = 200, height = 25, x = 420, y = 40)
-combobox_calculation_type = ttk.Combobox(tab1, values = ("Relaxation", "Single Point", "Charge", "Vibration", "DOS", "HSE", "Solvation"))
-combobox_calculation_type.set("Relaxation")
-combobox_calculation_type.place(width = 100, height = 25, x = 620, y = 40)
+combobox2 = ttk.Combobox(tab1, values = ("Relaxation", "Single Point", "Vibration", "DOS", "HSE", "Solvation"))
+combobox2.set("Relaxation")
+combobox2.place(width = 100, height = 25, x = 620, y = 40)
 
 ## Functional
 label3 = Label(tab1, text = "Functional :", relief = "flat", anchor = "w")
@@ -427,26 +397,9 @@ btn6 = Button(tab3, text = "Apply", command = write_kpoints)
 btn6.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
 btn6.place(width = 100, height = 30, x = 620, y = 50)
 
-############## Forth Tab - Shell script ##############
-## text box
-shell_text = scrolledtext.ScrolledText(tab4, relief="solid", font = ("Consolas", 10))
-shell_text.place(width = 520, height = 660, x = 10, y = 10)
-
-## Model Type
-shell_label = Label(tab4, text = "Select Sever :", relief = "flat", anchor = "w")
-shell_label.place(width = 200, height = 30, x = 540, y = 10)
-
-shell_combobox = ttk.Combobox(tab4, values = ("CEMD"))
-shell_combobox.set("CEMD")
-shell_combobox.place(width = 100, height = 30, x = 620, y = 10)
-
-shell_btn = Button(tab4, text = "Apply", command = make_shell)
-shell_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
-shell_btn.place(width = 100, height = 30, x = 620, y = 50)
 
 
-
-
+##############################################################################
 
 Make_all_btn = Button(text = "Make All", command = make_all)
 Make_all_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
