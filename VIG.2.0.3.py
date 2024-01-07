@@ -34,8 +34,9 @@ def apply_incar_value():
 
     #################### Write flags ####################
     text1.insert(CURRENT, "#Write flags\n")
-    if combobox_calculation_type.get() == "Single Point" or combobox_calculation_type.get() == "Vibration" or \
-        combobox_calculation_type.get() == "DOS" or combobox_calculation_type.get() == "HSE":
+
+    calculation_type = combobox_calculation_type.get()
+    if calculation_type in ["Single Point", "Vibration", "Charge", "DOS", "HSE"]:
         text1.insert(CURRENT, "LORBIT  = 11\n")
     else:
         pass
@@ -49,11 +50,10 @@ def apply_incar_value():
     elif combobox_calculation_type.get() == "Charge":
         text1.insert(CURRENT, "LWAVE   = .FALSE.\n")
         text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
-        text1.insert(CURRENT, "LVHAR   = .TRUE.\n")
         text1.insert(CURRENT, "LAECHG  = .TRUE.\n")
     elif combobox_calculation_type.get() == "DOS":
         text1.insert(CURRENT, "LWAVE   = .TRUE.\n")
-        text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
+        text1.insert(CURRENT, "LCHARG  = .FALSE.\n")
     else:
         text1.insert(CURRENT, "LWAVE   = .FALSE.\n")
         text1.insert(CURRENT, "LCHARG  = .FALSE.\n")
@@ -75,7 +75,7 @@ def apply_incar_value():
 
     #################### Dipole Correction ####################
     text1.insert(CURRENT, "#Dipole Correction\n")
-    if combobox1.get() == "Surface":
+    if combobox_model_type.get() == "Surface":
         text1.insert(CURRENT, "LDIPOL  = .TRUE.\n")
         text1.insert(CURRENT, "IDIPOL  = 3\n")
         text1.insert(CURRENT, "\n")
@@ -106,6 +106,8 @@ def apply_incar_value():
     text1.insert(CURRENT, "#Electronic Relaxation\n")
     if combobox_calculation_type.get() == "HSE":
         pass
+    elif combobox_model_type.get() == "Molecule":
+        text1.insert(CURRENT, "IALGO   = 38\n")
     else:
         text1.insert(CURRENT, "IALGO   = 48\n")
 
@@ -126,7 +128,7 @@ def apply_incar_value():
         text1.insert(CURRENT, "IBRION  = 2\n")
         text1.insert(CURRENT, "NSW     = 1000\n")
         text1.insert(CURRENT, "POTIM   = 0.5\n")
-        if combobox1.get() == "Bulk":
+        if combobox_model_type.get() == "Bulk":
             text1.insert(CURRENT, "ISIF    = 3\n")
         else:
             text1.insert(CURRENT, "ISIF    = 2\n")
@@ -262,7 +264,10 @@ def fix_atoms():
         atom_position_list = (text2.get(start, end)).split()
         atom_position_string = ""
         for i in range(3):
-            atom_position_string += "    " + "{:.9f}".format(float(atom_position_list[i]))
+            if float(atom_position_list[i]) < 0:
+                atom_position_string += "   " + "{:.9f}".format(float(atom_position_list[i]))
+            else:
+                atom_position_string += "    " + "{:.9f}".format(float(atom_position_list[i]))
         
         text2.delete(start, end)
         if atom_position_list[2] >= input_value:
@@ -273,30 +278,40 @@ def fix_atoms():
             text2.insert(end, "   F   F   F")
 
 def write_kpoints():
-    kpoints = []
-    poscar_lattice_parametor_x = text2.get("3.0", "3.end")
-    poscar_lattice_parametor_y = text2.get("4.0", "4.end")
-    poscar_lattice_parametor_z = text2.get("5.0", "5.end")
-    x_list = poscar_lattice_parametor_x.split()
-    y_list = poscar_lattice_parametor_y.split()
-    z_list = poscar_lattice_parametor_z.split()
-    
-    kpoints_x = math.ceil(40/math.sqrt(float(x_list[0])**2 + float(x_list[1])**2 + float(x_list[2])**2))
-    kpoints_y = math.ceil(40/math.sqrt(float(y_list[0])**2 + float(y_list[1])**2 + float(y_list[2])**2))
-    kpoints_z = math.ceil(40/math.sqrt(float(z_list[0])**2 + float(z_list[1])**2 + float(z_list[2])**2))
-
-    kpoints.append(kpoints_x)
-    kpoints.append(kpoints_y)
-    kpoints.append(kpoints_z)
-    
     text3.delete(1.0, END)
     text3.insert(CURRENT, "K-Points\n")
     text3.insert(CURRENT, "   0\n")
     text3.insert(CURRENT, "Gamma\n")
+
+    kpoints = []
     
     if combobox6.get() == "Bulk":
+        poscar_lattice_parametor_x = text2.get("3.0", "3.end")
+        poscar_lattice_parametor_y = text2.get("4.0", "4.end")
+        poscar_lattice_parametor_z = text2.get("5.0", "5.end")
+        x_list = poscar_lattice_parametor_x.split()
+        y_list = poscar_lattice_parametor_y.split()
+        z_list = poscar_lattice_parametor_z.split()
+        kpoints_x = math.ceil(40/math.sqrt(float(x_list[0])**2 + float(x_list[1])**2 + float(x_list[2])**2))
+        kpoints_y = math.ceil(40/math.sqrt(float(y_list[0])**2 + float(y_list[1])**2 + float(y_list[2])**2))
+        kpoints_z = math.ceil(40/math.sqrt(float(z_list[0])**2 + float(z_list[1])**2 + float(z_list[2])**2))
+        kpoints.append(kpoints_x)
+        kpoints.append(kpoints_y)
+        kpoints.append(kpoints_z)
         text3.insert(CURRENT, "   " + str(kpoints[0]) + "   " + str(kpoints[1]) + "   " + str(kpoints[2]) + "\n")
     elif combobox6.get() == "Surface":
+        poscar_lattice_parametor_x = text2.get("3.0", "3.end")
+        poscar_lattice_parametor_y = text2.get("4.0", "4.end")
+        poscar_lattice_parametor_z = text2.get("5.0", "5.end")
+        x_list = poscar_lattice_parametor_x.split()
+        y_list = poscar_lattice_parametor_y.split()
+        z_list = poscar_lattice_parametor_z.split()
+        kpoints_x = math.ceil(40/math.sqrt(float(x_list[0])**2 + float(x_list[1])**2 + float(x_list[2])**2))
+        kpoints_y = math.ceil(40/math.sqrt(float(y_list[0])**2 + float(y_list[1])**2 + float(y_list[2])**2))
+        kpoints_z = math.ceil(40/math.sqrt(float(z_list[0])**2 + float(z_list[1])**2 + float(z_list[2])**2))
+        kpoints.append(kpoints_x)
+        kpoints.append(kpoints_y)
+        kpoints.append(kpoints_z)
         text3.insert(CURRENT, "   " + str(kpoints[0]) + "   " + str(kpoints[1]) + "   1\n")
     elif combobox6.get() == "Molecule":
         text3.insert(CURRENT, "   1   1   1\n")
@@ -352,9 +367,9 @@ text1.place(width = 400, height = 660, x = 10, y = 10)
 ## Model Type
 label1 = Label(tab1, text = "Model Type :", relief = "flat", anchor = "w")
 label1.place(width = 200, height = 25, x = 420, y = 10)
-combobox1 = ttk.Combobox(tab1, values = ("Bulk", "Surface", "Molecule"))
-combobox1.set("Surface")
-combobox1.place(width = 100, height = 25, x = 620, y = 10)
+combobox_model_type = ttk.Combobox(tab1, values = ("Bulk", "Surface", "Molecule"))
+combobox_model_type.set("Surface")
+combobox_model_type.place(width = 100, height = 25, x = 620, y = 10)
 
 ## Calculation Type
 label2 = Label(tab1, text="Calculation Type :", relief="flat", anchor="w")
