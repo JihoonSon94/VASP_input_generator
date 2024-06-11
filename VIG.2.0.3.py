@@ -54,7 +54,8 @@ def apply_incar_value():
     elif combobox_calculation_type.get() == "DOS":
         text1.insert(CURRENT, "LWAVE   = .TRUE.\n")
         text1.insert(CURRENT, "LVTOT   = .TRUE.\n")
-        text1.insert(CURRENT, "LCHARG  = .FALSE.\n")
+        text1.insert(CURRENT, "LCHARG  = .TRUE.\n")
+        text1.insert(CURRENT, "LAECHG  = .TRUE.\n")
     else:
         text1.insert(CURRENT, "LWAVE   = .FALSE.\n")
         text1.insert(CURRENT, "LCHARG  = .FALSE.\n")
@@ -164,6 +165,9 @@ def apply_incar_value():
         text1.insert(CURRENT, "#DOS\n")
         text1.insert(CURRENT, "ISMEAR  = -5\n")
         text1.insert(CURRENT, "SIGMA   = 0.05\n")
+        text1.insert(CURRENT, "EMAX    = 20\n")
+        text1.insert(CURRENT, "EMIN    = -20\n")
+        text1.insert(CURRENT, "NEDOS   = 4000\n")
         text1.insert(CURRENT, "\n")
     else:
         text1.insert(CURRENT, "#DOS\n")
