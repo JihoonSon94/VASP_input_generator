@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import scrolledtext
+from ase.io import read, write
 import math
 import os
 
@@ -179,6 +180,33 @@ def apply_incar_value():
     text1.insert(CURRENT, "#Computational Parameter\n")
     text1.insert(CURRENT, "LPLANE  = .TRUE.\n")
     text1.insert(CURRENT, "NCORE   = 1\n")
+
+def convert_cif2vasp():
+# CIF 파일을 읽습니다.
+    import os
+from ase.io import read, write
+from tkinter import Tk, filedialog
+
+def convert_cif2vasp():
+
+    # 파일 선택 대화 상자를 엽니다.
+    file_path = filedialog.askopenfilename(initialdir=os.getcwd(), filetypes=[("CIF files", "*.cif"), ("VASP files", "*.vasp")])
+
+    if file_path:
+        # CIF 파일을 읽습니다.
+        atoms = read(file_path)
+
+        # 저장할 디렉토리를 선택합니다.
+        save_path = filedialog.asksaveasfilename(defaultextension=".vasp", filetypes=[("VASP POSCAR files", "*.vasp")])
+
+        if save_path:
+            # VASP POSCAR 파일로 저장합니다.
+            write(save_path, atoms, format='vasp')
+            print(f"File saved as {save_path}")
+        else:
+            print("Save cancelled.")
+    else:
+        print("File selection cancelled.")
 
 def read_poscar():
     global Recent_used_directory
@@ -363,6 +391,8 @@ tab3 = Frame(card)
 notebook.add(tab3, text = "KPOINTS")
 tab4 = Frame(card)
 notebook.add(tab4, text = "shell")
+tab5 = Frame(card)
+notebook.add(tab5, text = "File Convertor")
 
 ############## First Tab - INCAR ##############
 ## Text box
@@ -465,7 +495,19 @@ shell_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
 shell_btn.place(width = 100, height = 30, x = 620, y = 50)
 
 
+############## Fifth Tab - File Convertor ##############
+cif_import = Button(tab5, text = "Import", command = convert_cif2vasp)
+cif_import.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
+cif_import.place(width = 100, height = 30, x = 620, y = 10)
 
+## Label
+cif_import_label = Label(tab5, text="Z value :", relief="flat", anchor="w")
+cif_import_label.place(width = 70, height = 30, x = 540, y = 50)
+
+## Convert
+convert_btn = Button(tab5, text = "Apply value", command = fix_atoms)
+convert_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
+convert_btn.place(width = 100, height = 30, x = 620, y = 90)
 
 
 Make_all_btn = Button(text = "Make All", command = make_all)
