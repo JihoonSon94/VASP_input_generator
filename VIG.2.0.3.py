@@ -2,14 +2,10 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import scrolledtext
+from tkinterdnd2 import TkinterDnD, DND_FILES
 from ase.io import read, write
 import math
 import os
-
-card = Tk()
-card.geometry("750x760+500+100")
-card.title("INCAR Generator")
-card.resizable(0,0)
 
 Desktop_directory = os.environ['USERPROFILE']  + "\Desktop"
 Recent_used_directory=Desktop_directory
@@ -181,30 +177,94 @@ def apply_incar_value():
     text1.insert(CURRENT, "LPLANE  = .TRUE.\n")
     text1.insert(CURRENT, "NCORE   = 1\n")
 
-def convert_cif2vasp():
-# CIF 파일을 읽습니다.
-    import os
-from ase.io import read, write
-from tkinter import Tk, filedialog
-
-def convert_cif2vasp():
-
-    # 파일 선택 대화 상자를 엽니다.
-    file_path = filedialog.askopenfilename(initialdir=os.getcwd(), filetypes=[("CIF files", "*.cif"), ("VASP files", "*.vasp")])
-
+def dnd_convert_cif2vasp(file_path):
     if file_path:
         # CIF 파일을 읽습니다.
         atoms = read(file_path)
 
-        # 저장할 디렉토리를 선택합니다.
-        save_path = filedialog.asksaveasfilename(defaultextension=".vasp", filetypes=[("VASP POSCAR files", "*.vasp")])
+        # 파일 이름에서 확장자를 제거합니다.
+        file_name = os.path.basename(file_path)
+        file_name_without_ext = os.path.splitext(file_name)[0]
 
-        if save_path:
-            # VASP POSCAR 파일로 저장합니다.
-            write(save_path, atoms, format='vasp')
-            print(f"File saved as {save_path}")
-        else:
-            print("Save cancelled.")
+        # 저장할 경로를 설정합니다.
+        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.vasp')
+
+        # VASP POSCAR 파일로 저장합니다 (분수 좌표로).
+        write(save_path, atoms, format='vasp', direct=True)
+        print(f"File saved as {save_path}")
+    else:
+        print("File selection cancelled.")
+
+def dnd_convert_vasp2cif(file_path):
+    if file_path:
+        # VASP 파일을 읽습니다.
+        atoms = read(file_path, format='vasp')
+
+        # 파일 이름에서 확장자를 제거합니다.
+        file_name = os.path.basename(file_path)
+        file_name_without_ext = os.path.splitext(file_name)[0]
+
+        # 저장할 경로를 설정합니다.
+        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.cif')
+
+        # CIF 파일로 저장합니다.
+        write(save_path, atoms, format='cif')
+        print(f"File saved as {save_path}")
+    else:
+        print("File selection cancelled.")
+
+def drop(event):
+    file_path = event.data.strip('{}')  # TkinterDnD가 반환하는 경로는 중괄호로 감싸져 있으므로 이를 제거합니다.
+    if file_path.lower().endswith('.cif'):
+        dnd_convert_cif2vasp(file_path)
+    else:
+        dnd_convert_vasp2cif(file_path)
+
+def convert_cif2vasp():
+    global Recent_used_directory
+    # 파일 선택 대화 상자를 엽니다.
+    file_path = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=[("CIF files", "*.cif")])
+
+    if file_path:
+        Recent_used_directory= "/".join(file_path.split("/")[:-1])
+        # CIF 파일을 읽습니다.
+        atoms = read(file_path)
+
+        file_name = os.path.basename(file_path)
+        file_name_without_ext = os.path.splitext(file_name)[0]
+
+        # 저장할 디렉토리를 선택합니다.
+        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.vasp')
+
+        write(save_path, atoms, format='vasp', direct=True)
+        print(f"File saved as {save_path}")
+
+    else:
+        print("File selection cancelled.")
+
+
+
+
+def convert_vasp2cif():
+    global Recent_used_directory
+    # 파일 선택 대화 상자를 엽니다.
+    file_path = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=[("VASP files", ("*.vasp", "*POSCAR*", "*CONTCAR*"))])
+
+    if file_path:
+        Recent_used_directory= "/".join(file_path.split("/")[:-1])
+        # VASP 파일을 읽습니다.
+        atoms = read(file_path, format='vasp')
+
+        # 파일 이름에서 확장자를 제거합니다.
+        file_name = os.path.basename(file_path)
+        file_name_without_ext = os.path.splitext(file_name)[0]
+
+        # 저장할 경로를 설정합니다.
+        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.cif')
+
+        # CIF 파일로 저장합니다.
+        write(save_path, atoms, format='cif')
+        print(f"File saved as {save_path}")
     else:
         print("File selection cancelled.")
 
@@ -274,8 +334,8 @@ def read_poscar():
     for i in range(count):
         temp = array[i]
         for i in range(3):
-            text2.insert(CURRENT, "    ")
-            text2.insert(CURRENT, "{:.9f}".format(round(float(temp[i]),9)))
+            text2.insert(CURRENT, "  ")
+            text2.insert(CURRENT, "{:.16f}".format(round(float(temp[i]),16)))
         text2.insert(CURRENT, "\n")
     
 def fix_atoms():
@@ -298,9 +358,9 @@ def fix_atoms():
         atom_position_string = ""
         for i in range(3):
             if float(atom_position_list[i]) < 0:
-                atom_position_string += "   " + "{:.9f}".format(float(atom_position_list[i]))
+                atom_position_string += " " + "{:.16f}".format(float(atom_position_list[i]))
             else:
-                atom_position_string += "    " + "{:.9f}".format(float(atom_position_list[i]))
+                atom_position_string += "  " + "{:.16f}".format(float(atom_position_list[i]))
         
         text2.delete(start, end)
         if atom_position_list[2] >= input_value:
@@ -379,6 +439,12 @@ def make_all():
     OUT.write(shell_text.get(1.0, END))
     OUT.close()
 
+
+card = TkinterDnD.Tk()
+card.geometry("750x760+500+100")
+card.title("INCAR Generator")
+card.resizable(0,0)
+
 # Tab Configuration
 notebook = ttk.Notebook(card, width = 730, height = 680)
 notebook.pack()
@@ -442,7 +508,7 @@ btn1.place(width = 100, height = 30, x = 620, y = 160)
 ############## Second Tab - POSCAR ##############
 ## Express box
 text2 = scrolledtext.ScrolledText(tab2, relief="solid", font = ("Consolas", 10))
-text2.place(width = 520, height = 660, x = 10, y = 10)
+text2.place(width = 550, height = 660, x = 10, y = 10)
 
 ## Import
 btn3 = Button(tab2, text = "Import", command = read_poscar)
@@ -451,7 +517,7 @@ btn3.place(width = 100, height = 30, x = 620, y = 10)
 
 ## Z-value
 label6 = Label(tab2, text="Z value :", relief="flat", anchor="w")
-label6.place(width = 70, height = 30, x = 540, y = 50)
+label6.place(width = 70, height = 30, x = 560, y = 50)
 
 entry1 = Entry(tab2, border = 1, relief = "solid", font = ("Consolas", 10))
 entry1.place(width = 100, height = 30, x = 620, y = 50)
@@ -496,18 +562,25 @@ shell_btn.place(width = 100, height = 30, x = 620, y = 50)
 
 
 ############## Fifth Tab - File Convertor ##############
-cif_import = Button(tab5, text = "Import", command = convert_cif2vasp)
+cif_import = Button(tab5, text = "cif to vasp", command = convert_cif2vasp)
 cif_import.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
-cif_import.place(width = 100, height = 30, x = 620, y = 10)
-
-## Label
-cif_import_label = Label(tab5, text="Z value :", relief="flat", anchor="w")
-cif_import_label.place(width = 70, height = 30, x = 540, y = 50)
+cif_import.place(width = 200, height = 30, x = 520, y = 10)
 
 ## Convert
-convert_btn = Button(tab5, text = "Apply value", command = fix_atoms)
-convert_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
-convert_btn.place(width = 100, height = 30, x = 620, y = 90)
+vasp_import = Button(tab5, text = "vasp to cif", command = convert_vasp2cif)
+vasp_import.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
+vasp_import.place(width = 200, height = 30, x = 520, y = 50)
+
+
+drop_frame = Frame(tab5, bd=2, relief="sunken", width=400, height=300)
+drop_frame.pack(padx=10, pady=10, expand=True)
+
+drop_label = Label(drop_frame, text="Drag and drop a .cif or .vasp file here", width=40, height=10)
+drop_label.pack(padx=10, pady=10, expand=True)
+
+# 드래그 앤 드롭 이벤트를 바인딩합니다.
+drop_frame.drop_target_register(DND_FILES)
+drop_frame.dnd_bind('<<Drop>>', drop)
 
 
 Make_all_btn = Button(text = "Make All", command = make_all)
