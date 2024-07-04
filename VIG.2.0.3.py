@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import scrolledtext
 from tkinterdnd2 import TkinterDnD, DND_FILES
 from ase.io import read, write
+from ase.atoms import Atoms
 import math
 import os
 
@@ -177,11 +178,13 @@ def apply_incar_value():
     text1.insert(CURRENT, "LPLANE  = .TRUE.\n")
     text1.insert(CURRENT, "NCORE   = 1\n")
 
-def dnd_convert_cif2vasp(file_path):
+def convert_cif2vasp(file_path):
     if file_path:
         # CIF 파일을 읽습니다.
         atoms = read(file_path)
-
+        print(atoms)
+        unique_symbols = sorted(set(atoms.get_chemical_symbols()))
+        print(unique_symbols)
         # 파일 이름에서 확장자를 제거합니다.
         file_name = os.path.basename(file_path)
         file_name_without_ext = os.path.splitext(file_name)[0]
@@ -190,12 +193,12 @@ def dnd_convert_cif2vasp(file_path):
         save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.vasp')
 
         # VASP POSCAR 파일로 저장합니다 (분수 좌표로).
-        write(save_path, atoms, format='vasp', direct=True)
+        write(save_path, atoms, format='vasp', direct=True, sort=True)
         print(f"File saved as {save_path}")
     else:
         print("File selection cancelled.")
 
-def dnd_convert_vasp2cif(file_path):
+def convert_vasp2cif(file_path):
     if file_path:
         # VASP 파일을 읽습니다.
         atoms = read(file_path, format='vasp')
@@ -216,57 +219,9 @@ def dnd_convert_vasp2cif(file_path):
 def drop(event):
     file_path = event.data.strip('{}')  # TkinterDnD가 반환하는 경로는 중괄호로 감싸져 있으므로 이를 제거합니다.
     if file_path.lower().endswith('.cif'):
-        dnd_convert_cif2vasp(file_path)
+        convert_cif2vasp(file_path)
     else:
-        dnd_convert_vasp2cif(file_path)
-
-def convert_cif2vasp():
-    global Recent_used_directory
-    # 파일 선택 대화 상자를 엽니다.
-    file_path = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=[("CIF files", "*.cif")])
-
-    if file_path:
-        Recent_used_directory= "/".join(file_path.split("/")[:-1])
-        # CIF 파일을 읽습니다.
-        atoms = read(file_path)
-
-        file_name = os.path.basename(file_path)
-        file_name_without_ext = os.path.splitext(file_name)[0]
-
-        # 저장할 디렉토리를 선택합니다.
-        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.vasp')
-
-        write(save_path, atoms, format='vasp', direct=True)
-        print(f"File saved as {save_path}")
-
-    else:
-        print("File selection cancelled.")
-
-
-
-
-def convert_vasp2cif():
-    global Recent_used_directory
-    # 파일 선택 대화 상자를 엽니다.
-    file_path = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=[("VASP files", ("*.vasp", "*POSCAR*", "*CONTCAR*"))])
-
-    if file_path:
-        Recent_used_directory= "/".join(file_path.split("/")[:-1])
-        # VASP 파일을 읽습니다.
-        atoms = read(file_path, format='vasp')
-
-        # 파일 이름에서 확장자를 제거합니다.
-        file_name = os.path.basename(file_path)
-        file_name_without_ext = os.path.splitext(file_name)[0]
-
-        # 저장할 경로를 설정합니다.
-        save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.cif')
-
-        # CIF 파일로 저장합니다.
-        write(save_path, atoms, format='cif')
-        print(f"File saved as {save_path}")
-    else:
-        print("File selection cancelled.")
+        convert_vasp2cif(file_path)
 
 def read_poscar():
     global Recent_used_directory
@@ -293,10 +248,10 @@ def read_poscar():
         for i in range(3):
             if float(temp[i]) < 0 or float(temp[i]) >= 10:
                 text2.insert(CURRENT, "   ")
-                text2.insert(CURRENT, "{:.9f}".format(round(float(temp[i]),9)))
+                text2.insert(CURRENT, "{:.16f}".format(round(float(temp[i]),16)))
             else:
                 text2.insert(CURRENT, "    ")
-                text2.insert(CURRENT, "{:.9f}".format(round(float(temp[i]),9)))
+                text2.insert(CURRENT, "{:.16f}".format(round(float(temp[i]),16)))
         text2.insert(CURRENT, "\n")
     
     for i in range(5,7):
