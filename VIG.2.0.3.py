@@ -217,11 +217,19 @@ def convert_vasp2cif(file_path):
         print("File selection cancelled.")
 
 def drop(event):
-    file_path = event.data.strip('{}')  # TkinterDnD가 반환하는 경로는 중괄호로 감싸져 있으므로 이를 제거합니다.
-    if file_path.lower().endswith('.cif'):
-        convert_cif2vasp(file_path)
-    else:
-        convert_vasp2cif(file_path)
+    file_paths = card.tk.splitlist(event.data)
+    for file_path in file_paths:
+        clean_path = file_path.strip('{}')
+        if file_path.lower().endswith('.cif'):
+            convert_cif2vasp(clean_path)
+        else:
+            convert_vasp2cif(clean_path)
+
+#    file_path = event.data.strip('{}')  # TkinterDnD가 반환하는 경로는 중괄호로 감싸져 있으므로 이를 제거합니다.
+#    if file_path.lower().endswith('.cif'):
+#        convert_cif2vasp(file_path)
+#    else:
+#        convert_vasp2cif(file_path)
 
 def read_poscar():
     global Recent_used_directory
