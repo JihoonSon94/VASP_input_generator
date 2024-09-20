@@ -211,11 +211,15 @@ def drop(event):
 
 def read_poscar():
     global Recent_used_directory
+    global new_file_name
     filename = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=(("vasp files", "*.vasp"),("all files","*.*")))
 
     if filename:
         Recent_used_directory= "/".join(filename.split("/")[:-1])
-    
+        base_name = os.path.basename(filename)
+        file_name_without_ext = os.path.splitext(base_name)[0]
+        new_file_name = 'modified_' + file_name_without_ext
+
     IN = open(filename,"r")
     
     lines = IN.readlines()
@@ -311,8 +315,10 @@ def fix_atoms():
 
 def write_poscar():
     global Recent_used_directory
+    global new_file_name
     file_path = filedialog.asksaveasfilename(
         initialdir=Recent_used_directory,
+        initialfile= new_file_name,
         defaultextension=".vasp",
         filetypes=[("VASP", "*.vasp"), ("All files", "*.*")]
     )
@@ -374,6 +380,9 @@ def make_shell():
     shell_text.insert(CURRENT, "mpirun /appl/programs/vasp/vasp.5.4.4/bin/vasp_std > log\n")
     shell_text.insert(CURRENT, "\n")
     shell_text.insert(CURRENT, "exit 0\n")
+
+def on_enter(event):
+    fix_atoms()
 
 card = TkinterDnD.Tk()
 card.geometry("750x710+500+100")
@@ -456,10 +465,11 @@ label6.place(width = 70, height = 30, x = 560, y = 50)
 
 entry1 = Entry(tab2, border = 1, relief = "solid", font = ("Consolas", 10))
 entry1.place(width = 100, height = 30, x = 620, y = 50)
+entry1.bind("<Return>", on_enter)
 
-btn4 = Button(tab2, text = "Apply value", command = fix_atoms)
-btn4.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
-btn4.place(width = 100, height = 30, x = 620, y = 90)
+z_value_apply_btn = Button(tab2, text = "Apply value", command = fix_atoms)
+z_value_apply_btn.configure(font = ("Arial", 10, "bold"), bg = "#CCCCCC")
+z_value_apply_btn.place(width = 100, height = 30, x = 620, y = 90)
 
 ## Write POSCAR file
 Make_POSCAR_btn = Button(tab2, text = "Save as File", command = write_poscar)
@@ -502,7 +512,7 @@ shell_btn.place(width = 100, height = 30, x = 620, y = 50)
 
 
 ############## Fifth Tab - File Convertor ##############
-drop_frame = Frame(tab5, bd=2, relief="sunken", width=500, height=500)
+drop_frame = Frame(tab5, bd=2, relief="sunken", width=700, height=600)
 drop_frame.pack(padx=10, pady=10, expand=True)
 
 drop_label = Label(drop_frame, text="Drag and drop a .cif or .vasp file here", width=40, height=10)
