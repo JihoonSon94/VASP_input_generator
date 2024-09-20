@@ -5,6 +5,7 @@ from tkinter import scrolledtext
 from tkinterdnd2 import TkinterDnD, DND_FILES
 from ase.io import read, write
 from ase.atoms import Atoms
+from ase.visualize import view
 import math
 import os
 
@@ -213,7 +214,7 @@ def read_poscar():
     global Recent_used_directory
     global new_file_name
     filename = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=(("vasp files", "*.vasp"),("all files","*.*")))
-
+    
     if filename:
         Recent_used_directory= "/".join(filename.split("/")[:-1])
         base_name = os.path.basename(filename)
@@ -384,6 +385,12 @@ def make_shell():
 def on_enter(event):
     fix_atoms()
 
+def visualization():
+    global Recent_used_directory
+    filename = filedialog.askopenfilename(initialdir=Recent_used_directory, filetypes=(("vasp files", "*.vasp"),("all files","*.*")))
+    visualize = read(filename)
+    view(visualize)
+
 card = TkinterDnD.Tk()
 card.geometry("750x710+500+100")
 card.title("INCAR Generator")
@@ -403,6 +410,8 @@ tab4 = Frame(card)
 notebook.add(tab4, text = "shell")
 tab5 = Frame(card)
 notebook.add(tab5, text = "File Convertor")
+tab6 = Frame(card)
+notebook.add(tab6, text = "Tools")
 
 ############## First Tab - INCAR ##############
 ## Text box
@@ -518,8 +527,12 @@ drop_frame.pack(padx=10, pady=10, expand=True)
 drop_label = Label(drop_frame, text="Drag and drop a .cif or .vasp file here", width=40, height=10)
 drop_label.pack(padx=10, pady=10, expand=True)
 
-# 드래그 앤 드롭 이벤트를 바인딩합니다.
 drop_frame.drop_target_register(DND_FILES)
 drop_frame.dnd_bind('<<Drop>>', drop)
+
+############## Sixth Tab - Tools ##############
+visualization_btn = Button(tab6, text = "Visualization", command = visualization)
+visualization_btn.configure(font = ("Arial", 15, "bold"), bg = "#CCCCCC")
+visualization_btn.place(width = 200, height = 60, x = 10, y = 10)
 
 card.mainloop()
