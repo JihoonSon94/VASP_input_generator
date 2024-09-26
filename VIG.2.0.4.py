@@ -391,6 +391,18 @@ def visualization():
     visualize = read(filename)
     view(visualize)
 
+def visualization_drop(event):
+    file_paths = card.tk.splitlist(event.data)
+    for file_path in file_paths:
+        clean_path = file_path.strip('{}')
+        try:
+            visualize = read(clean_path)
+            view(visualize)
+        except Exception as e:
+            print(f"Error reading file {clean_path}: {e}")
+        else:
+            print("File is not a .vasp file. Please drop a valid .vasp file.")
+
 card = TkinterDnD.Tk()
 card.geometry("750x710+500+100")
 card.title("INCAR Generator")
@@ -411,7 +423,7 @@ notebook.add(tab4, text = "shell")
 tab5 = Frame(card)
 notebook.add(tab5, text = "File Convertor")
 tab6 = Frame(card)
-notebook.add(tab6, text = "Tools")
+notebook.add(tab6, text = "Visualization")
 
 ############## First Tab - INCAR ##############
 ## Text box
@@ -530,9 +542,18 @@ drop_label.pack(padx=10, pady=10, expand=True)
 drop_frame.drop_target_register(DND_FILES)
 drop_frame.dnd_bind('<<Drop>>', drop)
 
-############## Sixth Tab - Tools ##############
-visualization_btn = Button(tab6, text = "Visualization", command = visualization)
-visualization_btn.configure(font = ("Arial", 15, "bold"), bg = "#CCCCCC")
-visualization_btn.place(width = 200, height = 60, x = 10, y = 10)
+############## Sixth Tab - Visualization ##############
+visualization_btn = Button(tab6, text = "Import", command = visualization)
+visualization_btn.configure(font = ("Arial", 12), bg = "#CCCCCC")
+visualization_btn.place(width = 150, height = 30, x = 10, y = 10)
+
+drop_frame_visualization = Frame(tab6, bd=2, relief="sunken", width=710, height=540)
+drop_frame_visualization.place(x=10, y=80)
+
+drop_label_visualization = Label(tab6, text="Drag and drop a file here", relief = "flat", anchor = "w")
+drop_label_visualization.place(width = 200, height = 30, x = 300, y = 300)
+
+drop_frame_visualization.drop_target_register(DND_FILES)
+drop_frame_visualization.dnd_bind('<<Drop>>', lambda event: visualization_drop(event))
 
 card.mainloop()
