@@ -218,7 +218,7 @@ def drop_for_POSCAR_read(event):
     clean_path = file_path.strip('{}')
     atoms = read(clean_path)
     output = StringIO()
-    write(output, atoms, format='vasp')
+    write(output, atoms, format='vasp', sort=True)
     vasp_content = output.getvalue()
     text2.delete(1.0, END)
     text2.insert(END, vasp_content)
@@ -253,7 +253,7 @@ def fix_atoms():
     else:
         text2.insert("8.0", "Selective dynamics\n")
     
-    input_value = entry1.get()
+    input_value = float(entry1.get())
     position_range = total_num_of_atom + 10
     for i in range(10, position_range):
         start = str(i) + ".0"
@@ -261,13 +261,13 @@ def fix_atoms():
         atom_position_list = (text2.get(start, end)).split()
         atom_position_string = ""
         for i in range(3):
-            if float(atom_position_list[i]) < 0:
+            if float(atom_position_list[i]) < 0 or float(atom_position_list[i]) >= 10:
                 atom_position_string += " " + "{:.16f}".format(float(atom_position_list[i]))
             else:
                 atom_position_string += "  " + "{:.16f}".format(float(atom_position_list[i]))
         
         text2.delete(start, end)
-        if atom_position_list[2] >= input_value:
+        if float(atom_position_list[2]) >= input_value:
             text2.insert(start, atom_position_string)
             text2.insert(end, "   T   T   T")
         else:
