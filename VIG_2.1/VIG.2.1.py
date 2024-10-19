@@ -22,7 +22,11 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.setupUi(self)
         #self.setAcceptDrops(True)
         self.view_button.clicked.connect(self.structure_view)
+
+        self.save_poscar_button.clicked.connect(self.save_poscar)
+
         self.incar_option_apply_button.clicked.connect(self.apply_incar_value)
+
         self.z_value_apply.clicked.connect(self.fix_atoms)
         self.z_value.returnPressed.connect(self.fix_atoms)
         
@@ -272,9 +276,9 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.textbox_poscar.clear()
         self.textbox_poscar.setPlainText(updated_text)
 
-    def write_poscar(self):
+    def save_poscar(self):
         global Recent_used_directory
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;All files (*.*)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;CIF files (*.cif);;All files (*.*)")
         if file_path:
             content = self.textbox_poscar.toPlainText()
             string_io = StringIO(content)
