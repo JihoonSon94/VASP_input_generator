@@ -7,8 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>980</width>
-    <height>820</height>
+    <height>730</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="font">
    <font>
@@ -30,8 +36,14 @@
      <x>10</x>
      <y>20</y>
      <width>960</width>
-     <height>790</height>
+     <height>700</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="font">
     <font>
@@ -48,7 +60,7 @@
     <enum>QTabWidget::Rounded</enum>
    </property>
    <property name="currentIndex">
-    <number>4</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="INCAR">
     <property name="styleSheet">
@@ -63,7 +75,7 @@
        <x>10</x>
        <y>10</y>
        <width>520</width>
-       <height>740</height>
+       <height>650</height>
       </rect>
      </property>
      <property name="font">
@@ -475,6 +487,12 @@
     </widget>
    </widget>
    <widget class="QWidget" name="POSCAR">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <property name="acceptDrops">
      <bool>true</bool>
     </property>
@@ -493,8 +511,14 @@
        <x>10</x>
        <y>10</y>
        <width>700</width>
-       <height>740</height>
+       <height>650</height>
       </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="font">
       <font>
@@ -701,25 +725,6 @@
     <attribute name="title">
      <string>Tools</string>
     </attribute>
-    <widget class="QLabel" name="periodic_table">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>230</y>
-       <width>920</width>
-       <height>520</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap resource="Images.qrc">:/Images/Periodic Table.png</pixmap>
-     </property>
-     <property name="scaledContents">
-      <bool>true</bool>
-     </property>
-    </widget>
     <widget class="QLabel" name="file_convert_label">
      <property name="geometry">
       <rect>
@@ -771,7 +776,7 @@
        <x>10</x>
        <y>10</y>
        <width>700</width>
-       <height>740</height>
+       <height>650</height>
       </rect>
      </property>
      <property name="font">

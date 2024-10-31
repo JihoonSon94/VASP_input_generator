@@ -1,13 +1,13 @@
 import os
 import math
 import sys
+from os import environ
 from io import StringIO
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QTextCursor
 from PyQt5.QtCore import QTimer
 from ase.io import read, write
-from ase.visualize import view
 
 Desktop_directory = os.path.expanduser('~') + "/Desktop"
 Recent_used_directory = Desktop_directory
@@ -16,9 +16,16 @@ new_file_name = ''
 ui_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'main.ui')
 form_class = uic.loadUiType(ui_path)[0]
 
+def suppress_qt_warnings():
+    environ["QT_DEVICE_PIXEL_RATIO"] = "0"
+    environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    environ["QT_SCREEN_SCALE_FACTORS"] = "1"
+    environ["QT_SCALE_FACTOR"] = "1"
+
 class IncarGeneratorApp(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
+
         self.setupUi(self)
         #self.setAcceptDrops(True)
         self.view_button.clicked.connect(self.structure_view)
@@ -366,6 +373,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             print(f"File saved as {save_path}")
 
 if __name__ == '__main__':
+    suppress_qt_warnings()
     app = QApplication(sys.argv)
     mainWindow = IncarGeneratorApp()
     mainWindow.show()
