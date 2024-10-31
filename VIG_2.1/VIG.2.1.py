@@ -33,6 +33,9 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.POSCAR.dragEnterEvent = self.poscar_drag_enter_event
         self.POSCAR.dropEvent = self.poscar_drop_event
 
+        self.visualization_tab.dragEnterEvent = self.visualization_tab_drag_enter_event
+        self.visualization_tab.dropEvent = self.visualization_tab_drop_event
+
         self.file_convert_label.dragEnterEvent = self.convert_drag_enter_event
         self.file_convert_label.dropEvent = self.convert_drop_event
         
@@ -218,13 +221,36 @@ class IncarGeneratorApp(QMainWindow, form_class):
         else:
             event.ignore()
 
+    def visualization_tab_drag_enter_event(self, event):
+        if event.mimeData().hasUrls() :
+            event.accept()
+        else:
+            event.ignore()
+
+    def visualization_tab_drop_event(self, event):
+        if event.mimeData().hasUrls() :
+            self.visualize_strucutre_file(event)
+        else:
+            event.ignore()
+
+    def visualize_strucutre_file(self, event):
+        for url in event.mimeData().urls():
+            file_path = url.toLocalFile()
+            clean_path = file_path.strip('{}')
+            atoms = read(clean_path)
+            #output = StringIO()
+            #write(output, atoms)
+            #structure_file_content = atoms
+            #self.textbox_structure_file.clear()
+            #self.textbox_structure_file.insertPlainText(atoms)
+
     def drop_for_read_poscar(self, event):
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
             clean_path = file_path.strip('{}')
             atoms = read(clean_path)
             output = StringIO()
-            write(output, atoms, format='vasp', sort=True)
+            write(output, atoms, format='vasp')
             vasp_content = output.getvalue()
             self.textbox_poscar.clear()
             self.textbox_poscar.insertPlainText(vasp_content)
