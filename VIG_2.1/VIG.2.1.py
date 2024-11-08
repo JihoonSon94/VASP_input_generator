@@ -55,7 +55,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "SYMPREC" : "1E-8",
             "ISTART" : "",
             "ICHARG" : "",
-            "ISPIN" : "",
+            "ISPIN" : "2",
             "GGA" : "",
             "IVDW" : "",
 
@@ -82,7 +82,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "IBRION" : "",
             "NSW" : "",
             "POTIM" : "",
-            "ISIF" : "",
+            "ISIF" : "2",
             "EDIFFG" : "",
             "ISYM" : "",
             "NFREE" : "",
@@ -148,6 +148,8 @@ class IncarGeneratorApp(QMainWindow, form_class):
         if self.comboBox_1.currentText() == "Surface":
             incar["LDIPOL"] = ".TRUE."
             incar["IDIPOL"] = "3"
+        elif self.comboBox_1.currentText() == "Bulk":
+            incar["ISIF"] = "3"
         else :
             pass
         
