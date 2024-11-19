@@ -29,9 +29,8 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.setupUi(self)
         #self.setAcceptDrops(True)
         self.view_button.clicked.connect(self.structure_view)
-
         self.save_poscar_button.clicked.connect(self.save_poscar)
-
+        self.sort_ion_button.clicked.connect(self.sort_ion)
         self.incar_option_apply_button.clicked.connect(self.apply_incar_value)
 
         self.z_value_apply.clicked.connect(self.fix_atoms)
@@ -310,6 +309,18 @@ class IncarGeneratorApp(QMainWindow, form_class):
         updated_text = "\n".join(lines)
         self.textbox_poscar.clear()
         self.textbox_poscar.setPlainText(updated_text)
+
+
+    def sort_ion(self):
+        read_textbox_poscar = self.textbox_poscar.toPlainText()
+        temp_vasp_type_file = StringIO(read_textbox_poscar)
+        temp_ase = read(temp_vasp_type_file, format='vasp')
+        sorted_poscar = StringIO()
+        write(sorted_poscar, temp_ase, format='vasp', sort = True)
+        sorted_poscar_content = sorted_poscar.getvalue()
+        self.textbox_poscar.clear()
+        self.textbox_poscar.setPlainText(sorted_poscar_content)
+
 
     def save_poscar(self):
         global Recent_used_directory
