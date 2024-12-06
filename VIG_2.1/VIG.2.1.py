@@ -27,11 +27,11 @@ class IncarGeneratorApp(QMainWindow, form_class):
         super().__init__()
 
         self.setupUi(self)
-        #self.setAcceptDrops(True)
         self.view_button.clicked.connect(self.structure_view)
         self.save_poscar_button.clicked.connect(self.save_poscar)
         self.sort_ion_button.clicked.connect(self.sort_ion)
         self.incar_option_apply_button.clicked.connect(self.apply_incar_value)
+        self.reset_coordinate_button.clicked.connect(self.reset_coordinate)
 
         self.z_value_apply.clicked.connect(self.fix_atoms)
         self.z_value.returnPressed.connect(self.fix_atoms)
@@ -320,6 +320,25 @@ class IncarGeneratorApp(QMainWindow, form_class):
         sorted_poscar_content = sorted_poscar.getvalue()
         self.textbox_poscar.clear()
         self.textbox_poscar.setPlainText(sorted_poscar_content)
+
+    def reset_coordinate(self):
+        # Textbox에서 POSCAR 텍스트 읽기
+        vasp_text = self.textbox_poscar.toPlainText()
+
+        # VASP 텍스트 → ASE 변환
+        ase_structure = read(StringIO(vasp_text), format='vasp')
+        
+        # 주기적 경계 조건에 따라 좌표 재설정
+        ase_structure.set_pbc(True)  # PBC 활성화
+        ase_structure.wrap()         # 좌표를 단위 셀 내부로 조정
+        
+        # ASE → VASP 변환
+        vasp_reset_text = StringIO()
+        write(vasp_reset_text, ase_structure, format='vasp')
+    
+        # 결과 업데이트
+        self.textbox_poscar.clear()
+        self.textbox_poscar.setPlainText(vasp_reset_text.getvalue())
 
 
     def save_poscar(self):
