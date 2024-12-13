@@ -83,7 +83,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "POTIM" : "",
             "ISIF" : "2",
             "EDIFFG" : "",
-            "ISYM" : "",
+            "ISYM" : "0",
             "NFREE" : "",
 
             "# DOS" : None,
@@ -96,6 +96,9 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "# Solvation" : None,
             "LSOL" : "",
             "TAU" : "",
+            "C_MOLAR" : "",
+            "R_ION" : "",
+            "EFERMI_ref" : "",
 
             "# HSE" : None,
             "LHFCALC" : "",
@@ -140,15 +143,16 @@ class IncarGeneratorApp(QMainWindow, form_class):
             incar["LWAVE"] = ".TRUE."
             incar["LCHARG"] = ".TRUE."
             incar["LAECHG"] = ".TRUE."
-            incar["LVHAR"] = ".TRUE."
         else:
             pass
 
         if self.comboBox_1.currentText() == "Surface":
             incar["LDIPOL"] = ".TRUE."
             incar["IDIPOL"] = "3"
+            incar["LVHAR"] = ".TRUE."
         elif self.comboBox_1.currentText() == "Bulk":
             incar["ISIF"] = "3"
+            incar["ISYM"] = "2"
         else :
             pass
         
@@ -172,7 +176,6 @@ class IncarGeneratorApp(QMainWindow, form_class):
             incar["NSW"] = "2000"
             incar["POTIM"] = "0.5"
             incar["EDIFFG"] = "1E-6"
-            incar["ISYM"] = "0"
         elif self.comboBox_2.currentText() == "Vibration":
             incar["IBRION"] = "5"
             incar["NSW"] = "2000"
@@ -186,7 +189,10 @@ class IncarGeneratorApp(QMainWindow, form_class):
 
         if self.comboBox_2.currentText() == "Solvation":
             incar["LSOL"] = ".TRUE."
-            incar["TAU"] = "0"
+            incar["ISOL"] = "2"
+            incar["C_MOLAR"] = "0.01"
+            incar["R_ION"] = "3"
+            incar["EFERMI_ref"] = "-4.57"
         else:
             pass
         
