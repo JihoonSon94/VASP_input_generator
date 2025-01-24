@@ -1,12 +1,9 @@
 import os
-import math
 import sys
 from os import environ
 from io import StringIO
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QDragEnterEvent, QDropEvent, QTextCursor
-from PyQt5.QtCore import QTimer
 from ase.io import read, write
 
 Desktop_directory = os.path.expanduser('~') + "/Desktop"
@@ -73,7 +70,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "ALGO" : "Fast",
             "ENCUT" : "400",
             "EDIFF" : "1E-7",
-            "NELM" : "300",
+            "NELM" : "110",
             "LREAL" : "Auto", 
             "MAXMIX" : "",
 
@@ -95,7 +92,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
 
             "# Solvation" : None,
             "LSOL" : "",
-            "TAU" : "",
+            "ISOL" : "",
             "C_MOLAR" : "",
             "R_ION" : "",
             "EFERMI_ref" : "",
@@ -110,8 +107,8 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "NCORE" : "1"
         }
 
-        if self.comboBox_2.currentText() in ["Solvation", "HSE"]:
-            incar["ISTART"] = "1"
+        if self.comboBox_2.currentText() in ["HSE"]:
+            incar["ISTART"] = "0"
         else:
             incar["ISTART"] = "0"
 
@@ -147,8 +144,9 @@ class IncarGeneratorApp(QMainWindow, form_class):
             pass
 
         if self.comboBox_1.currentText() == "Surface":
-            incar["LDIPOL"] = ".TRUE."
-            incar["IDIPOL"] = "3"
+            if not self.comboBox_2.currentText() == "Solvation":
+                incar["LDIPOL"] = ".TRUE."
+                incar["IDIPOL"] = "3"
             incar["LVHAR"] = ".TRUE."
         elif self.comboBox_1.currentText() == "Bulk":
             incar["ISIF"] = "3"
@@ -175,7 +173,8 @@ class IncarGeneratorApp(QMainWindow, form_class):
             incar["IBRION"] = "2"
             incar["NSW"] = "2000"
             incar["POTIM"] = "0.5"
-            incar["EDIFFG"] = "1E-6"
+            incar["EDIFFG"] = "1E-5"
+            incar["EDIFF"] = "1E-6"
         elif self.comboBox_2.currentText() == "Vibration":
             incar["IBRION"] = "5"
             incar["NSW"] = "2000"
@@ -188,6 +187,11 @@ class IncarGeneratorApp(QMainWindow, form_class):
             incar["NSW"] = "0"
 
         if self.comboBox_2.currentText() == "Solvation":
+            incar["IBRION"] = "2"
+            incar["NSW"] = "200"
+            incar["POTIM"] = "0.1"
+            incar["EDIFFG"] = "1E-5"
+            incar["EDIFF"] = "1E-6"
             incar["LSOL"] = ".TRUE."
             incar["ISOL"] = "2"
             incar["C_MOLAR"] = "0.01"
