@@ -1,9 +1,11 @@
 import os
 import sys
+import math
 from os import environ
 from io import StringIO
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
 from ase.io import read, write
 
 Desktop_directory = os.path.expanduser('~') + "/Desktop"
@@ -19,11 +21,12 @@ def suppress_qt_warnings():
     environ["QT_SCREEN_SCALE_FACTORS"] = "1"
     environ["QT_SCALE_FACTOR"] = "1"
 
-class IncarGeneratorApp(QMainWindow, form_class):
+class IncarGeneratorApp(QDialog, form_class):
     def __init__(self):
         super().__init__()
-
+        self.setWindowFlags(Qt.WindowCloseButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint)
         self.setupUi(self)
+        
         self.view_button.clicked.connect(self.structure_view)
         self.save_poscar_button.clicked.connect(self.save_poscar)
         self.sort_ion_button.clicked.connect(self.sort_ion)
@@ -36,8 +39,8 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.POSCAR.dragEnterEvent = self.poscar_drag_enter_event
         self.POSCAR.dropEvent = self.poscar_drop_event
 
-        self.visualization_tab.dragEnterEvent = self.visualization_tab_drag_enter_event
-        self.visualization_tab.dropEvent = self.visualization_tab_drop_event
+        self.kpoints_apply_button.clicked.connect(self.write_kpoints)
+        self.kpoints_resolution.returnPressed.connect(self.write_kpoints)
 
         self.file_convert_label.dragEnterEvent = self.convert_drag_enter_event
         self.file_convert_label.dropEvent = self.convert_drop_event
@@ -56,9 +59,9 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "IVDW" : "",
 
             "# Write Flags" : None,
-            "LWAVE" : "",
-            "LCHARG" : "",
-            "LAECHG" : "",
+            "LWAVE" : ".FALSE.",
+            "LCHARG" : ".FALSE.",
+            "LAECHG" : ".FALSE.",
             "LVHAR" : "",
             "LORBIT" : "11",
 
@@ -70,7 +73,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "ALGO" : "Fast",
             "ENCUT" : "400",
             "EDIFF" : "1E-7",
-            "NELM" : "110",
+            "NELM" : "60",
             "LREAL" : "Auto", 
             "MAXMIX" : "",
 
@@ -97,6 +100,14 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "R_ION" : "",
             "EFERMI_ref" : "",
 
+            "# DFT+U" : None,
+            "LDAU" : "",
+            "LDAUTYPE" : "",
+            "LDAUL" : "",
+            "LDAUU" : "",
+            "LDAUJ" : "",
+            "LMAXMIX" : "",
+
             "# HSE" : None,
             "LHFCALC" : "",
             "HFSCREEN" : "",
@@ -106,7 +117,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             "LPLANE" : ".TRUE.",
             "NCORE" : "1"
         }
-
+        
         if self.comboBox_2.currentText() in ["HSE"]:
             incar["ISTART"] = "0"
         else:
@@ -133,15 +144,6 @@ class IncarGeneratorApp(QMainWindow, form_class):
         else:
             pass
         
-        if self.comboBox_2.currentText() in ["Relaxation", "Solvation", "Vibration"]:
-            incar["LWAVE"] = ".FALSE."
-            incar["LCHARG"] = ".FALSE."
-        elif self.comboBox_2.currentText() in ["Single Point", "HSE"]:
-            incar["LWAVE"] = ".TRUE."
-            incar["LCHARG"] = ".TRUE."
-            incar["LAECHG"] = ".TRUE."
-        else:
-            pass
 
         if self.comboBox_1.currentText() == "Surface":
             if not self.comboBox_2.currentText() == "Solvation":
@@ -212,6 +214,34 @@ class IncarGeneratorApp(QMainWindow, form_class):
         else:
             pass
         
+        if self.CheckBox_02.isChecked():
+            incar["LWAVE"] = ".TRUE."
+        else:
+            pass
+
+        if self.CheckBox_03.isChecked():
+            incar["LCHARG"] = ".TRUE."
+            incar["LAECHG"] = ".TRUE."
+        else:
+            pass
+
+        if self.CheckBox_01.isChecked():
+            lines = self.textbox_poscar.toPlainText().splitlines()
+
+            if len(lines) >= 7:
+                num_elements = len(lines[6].split())  # 7번째 줄 (인덱스 6)을 공백 기준으로 분할
+            else:
+                num_elements = 1  # 7번째 줄이 없으면 0
+
+            incar["LDAU"] = ".TRUE."
+            incar["LDAUTYPE"] = "2"
+            incar["LDAUL"] = " ".join(["2"] * num_elements)
+            incar["LDAUU"] = " ".join(["4.0"] * num_elements)
+            incar["LDAUJ"] = " ".join(["0.0"] * num_elements)
+            incar["LMAXMIX"] = "4"
+        else:
+            pass
+
         incar_text = ""
         for key in incar:
             if key.startswith("#"):
@@ -222,7 +252,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             elif incar[key] == "":
                 pass
             else:
-                incar_text += f"{key.ljust(10)} = {incar[key]} \n"
+                incar_text += f"{key.ljust(10)} = {incar[key]}\n"
         
         self.textbox_incar.setPlainText(incar_text)
 
@@ -239,29 +269,6 @@ class IncarGeneratorApp(QMainWindow, form_class):
         else:
             event.ignore()
 
-    def visualization_tab_drag_enter_event(self, event):
-        if event.mimeData().hasUrls() :
-            event.accept()
-        else:
-            event.ignore()
-
-    def visualization_tab_drop_event(self, event):
-        if event.mimeData().hasUrls() :
-            self.visualize_strucutre_file(event)
-        else:
-            event.ignore()
-
-    def visualize_strucutre_file(self, event):
-        for url in event.mimeData().urls():
-            file_path = url.toLocalFile()
-            clean_path = file_path.strip('{}')
-            atoms = read(clean_path)
-            #output = StringIO()
-            #write(output, atoms)
-            #structure_file_content = atoms
-            #self.textbox_structure_file.clear()
-            #self.textbox_structure_file.insertPlainText(atoms)
-
     def drop_for_read_poscar(self, event):
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
@@ -272,7 +279,6 @@ class IncarGeneratorApp(QMainWindow, form_class):
             vasp_content = output.getvalue()
             self.textbox_poscar.clear()
             self.textbox_poscar.insertPlainText(vasp_content)
-
 
     def read_poscar(self):
         global Recent_used_directory
@@ -332,33 +338,28 @@ class IncarGeneratorApp(QMainWindow, form_class):
         self.textbox_poscar.setPlainText(sorted_poscar_content)
 
     def reset_coordinate(self):
-        # Textbox에서 POSCAR 텍스트 읽기
         vasp_text = self.textbox_poscar.toPlainText()
 
-        # VASP 텍스트 → ASE 변환
         ase_structure = read(StringIO(vasp_text), format='vasp')
         
-        # 주기적 경계 조건에 따라 좌표 재설정
-        ase_structure.set_pbc(True)  # PBC 활성화
-        ase_structure.wrap()         # 좌표를 단위 셀 내부로 조정
-        
-        # ASE → VASP 변환
+        ase_structure.set_pbc(True)  
+        ase_structure.wrap()         
         vasp_reset_text = StringIO()
         write(vasp_reset_text, ase_structure, format='vasp')
     
-        # 결과 업데이트
         self.textbox_poscar.clear()
         self.textbox_poscar.setPlainText(vasp_reset_text.getvalue())
 
 
     def save_poscar(self):
         global Recent_used_directory
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;CIF files (*.cif);;All files (*.*)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;CIF files (*.cif);;PDB files (*.pdb);;All files (*.*)")
         if file_path:
             content = self.textbox_poscar.toPlainText()
             string_io = StringIO(content)
             atoms = read(string_io, format='vasp')
             write(file_path, atoms)
+
 
     def structure_view(self):
         structure_content = self.textbox_poscar.toPlainText()
@@ -373,8 +374,22 @@ class IncarGeneratorApp(QMainWindow, form_class):
         
 
     def write_kpoints(self):
-        # Not Yet
-        pass
+        input_value = float(self.kpoints_resolution.text())
+        lattcie_parameter_x = self.textbox_poscar.toPlainText().splitlines()[2].split()
+        lattcie_parameter_y = self.textbox_poscar.toPlainText().splitlines()[3].split()
+        lattcie_parameter_z = self.textbox_poscar.toPlainText().splitlines()[4].split()
+        kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
+        kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
+        kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
+        kpoints = (
+            f"K-Spacing Value: {input_value}\n"
+            f"0\n"
+            f"Gamma\n"
+            f"  {kpoints_x}   {kpoints_y}   {kpoints_z}\n"
+            f"  0   0   0"
+        )
+        self.textbox_kpoints.setPlainText(kpoints)
+
 
     def convert_drag_enter_event(self, event):
         if event.mimeData().hasUrls() :
@@ -382,11 +397,13 @@ class IncarGeneratorApp(QMainWindow, form_class):
         else:
             event.ignore()
     
+
     def convert_drop_event(self, event):
         if event.mimeData().hasUrls() :
             self.drop_for_file_convert(event)
         else:
             event.ignore()
+
 
     def drop_for_file_convert(self, event):
         for url in event.mimeData().urls():
@@ -395,6 +412,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
                 self.convert_cif2vasp(file_path)
             elif file_path.lower().endswith('.vasp'):
                 self.convert_vasp2cif(file_path)
+
 
     def convert_cif2vasp(self, file_path):
         if file_path:
@@ -405,6 +423,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             write(save_path, atoms, format='vasp', direct=False, sort=True)
             print(f"File saved as {save_path}")
 
+
     def convert_vasp2cif(self, file_path):
         if file_path:
             atoms = read(file_path, format='vasp')
@@ -413,6 +432,7 @@ class IncarGeneratorApp(QMainWindow, form_class):
             save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.cif')
             write(save_path, atoms, format='cif')
             print(f"File saved as {save_path}")
+
 
 if __name__ == '__main__':
     suppress_qt_warnings()
