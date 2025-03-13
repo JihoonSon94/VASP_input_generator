@@ -150,6 +150,8 @@ class IncarGeneratorApp(QDialog, form_class):
                 incar["LDIPOL"] = ".TRUE."
                 incar["IDIPOL"] = "3"
             incar["LVHAR"] = ".TRUE."
+            incar["ISIF"] = "2"
+            incar["ISYM"] = "0"
         elif self.comboBox_1.currentText() == "Bulk":
             incar["ISIF"] = "3"
             incar["ISYM"] = "2"
@@ -182,30 +184,27 @@ class IncarGeneratorApp(QDialog, form_class):
             incar["NSW"] = "2000"
             incar["POTIM"] = "0.015"
             incar["EDIFFG"] = "1E-6"
-            incar["ISYM"] = "0"
             incar["NFREE"] = "2"
         else:
-            incar["IBRION"] = "-1"
+            incar["IBRION"] = ""
             incar["NSW"] = "0"
+
+
 
         if self.comboBox_2.currentText() == "Solvation":
             incar["IBRION"] = "2"
             incar["NSW"] = "200"
             incar["POTIM"] = "0.1"
-            incar["EDIFFG"] = "1E-5"
-            incar["EDIFF"] = "1E-6"
+            incar["EDIFFG"] = "1E-4"
+            incar["EDIFF"] = "1E-5"
             incar["LSOL"] = ".TRUE."
             incar["ISOL"] = "2"
             incar["C_MOLAR"] = "0.01"
             incar["R_ION"] = "3"
-            incar["EFERMI_ref"] = "-4.57"
         else:
             pass
         
-        if self.comboBox_2.currentText() == "Single Point":
-            incar["EMAX"] = "20"
-            incar["EMIN"] = "-20"
-            incar["NEDOS"] = "4000"
+
 
         if self.comboBox_2.currentText() == "HSE":
             incar["LHFCALC"] = ".TRUE."
@@ -214,16 +213,6 @@ class IncarGeneratorApp(QDialog, form_class):
         else:
             pass
         
-        if self.CheckBox_02.isChecked():
-            incar["LWAVE"] = ".TRUE."
-        else:
-            pass
-
-        if self.CheckBox_03.isChecked():
-            incar["LCHARG"] = ".TRUE."
-            incar["LAECHG"] = ".TRUE."
-        else:
-            pass
 
         if self.CheckBox_01.isChecked():
             lines = self.textbox_poscar.toPlainText().splitlines()
@@ -242,6 +231,31 @@ class IncarGeneratorApp(QDialog, form_class):
         else:
             pass
 
+
+        if self.CheckBox_02.isChecked():
+            incar["LWAVE"] = ".TRUE."
+        else:
+            pass
+
+        if self.CheckBox_03.isChecked():
+            incar["LCHARG"] = ".TRUE."
+            incar["LAECHG"] = ".TRUE."
+        else:
+            pass
+
+        if self.CheckBox_04.isChecked():
+            incar["EMAX"] = "20"
+            incar["EMIN"] = "-40"
+            incar["NEDOS"] = "6000"
+        else:
+            pass
+
+        if self.CheckBox_05.isChecked():
+            incar["EFERMI_ref"] = "-4.57"
+        else:
+            pass
+
+
         incar_text = ""
         for key in incar:
             if key.startswith("#"):
@@ -255,6 +269,8 @@ class IncarGeneratorApp(QDialog, form_class):
                 incar_text += f"{key.ljust(10)} = {incar[key]}\n"
         
         self.textbox_incar.setPlainText(incar_text)
+
+
 
 
     def poscar_drag_enter_event(self, event):
