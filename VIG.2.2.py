@@ -369,7 +369,7 @@ class IncarGeneratorApp(QDialog, form_class):
 
     def save_poscar(self):
         global Recent_used_directory
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;CIF files (*.cif);;PDB files (*.pdb);;All files (*.*)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save POSCAR File", Recent_used_directory, "VASP files (*.vasp);;CIF files (*.cif);;PDB files (*.pdb);;XYZ files (*.xyz);;All files (*.*)")
         if file_path:
             content = self.textbox_poscar.toPlainText()
             string_io = StringIO(content)
@@ -394,9 +394,21 @@ class IncarGeneratorApp(QDialog, form_class):
         lattcie_parameter_x = self.textbox_poscar.toPlainText().splitlines()[2].split()
         lattcie_parameter_y = self.textbox_poscar.toPlainText().splitlines()[3].split()
         lattcie_parameter_z = self.textbox_poscar.toPlainText().splitlines()[4].split()
-        kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
-        kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
-        kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
+        if input_value < 0:
+            QMessageBox.warning(self, "Error", "K-Spacing Value must be greater than 0.")
+            return
+        elif input_value == 0:
+            kpoints_x = 1
+            kpoints_y = 1
+            kpoints_z = 1
+        else:
+            kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
+            kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
+            kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
+        #kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
+        #kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
+        #kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
+        
         kpoints = (
             f"K-Spacing Value: {input_value}\n"
             f"0\n"
