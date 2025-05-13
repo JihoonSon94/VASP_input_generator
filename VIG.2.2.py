@@ -289,12 +289,29 @@ class IncarGeneratorApp(QDialog, form_class):
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
             clean_path = file_path.strip('{}')
-            atoms = read(clean_path)
-            output = StringIO()
-            write(output, atoms, format='vasp')
-            vasp_content = output.getvalue()
-            self.textbox_poscar.clear()
-            self.textbox_poscar.insertPlainText(vasp_content)
+            ext = os.path.splitext(clean_path)[-1].lower()
+
+            if ext in ['.cif', '.vasp']:
+                try:
+                    atoms = read(clean_path)
+                    output = StringIO()
+                    write(output, atoms, format='vasp')
+                    vasp_content = output.getvalue()
+                    self.textbox_poscar.clear()
+                    self.textbox_poscar.insertPlainText(vasp_content)
+                except Exception as e:
+                    self.textbox_poscar.clear()
+                    self.textbox_poscar.insertPlainText(f"Error reading structured file: {e}")
+            else:
+                try:
+                    with open(clean_path, 'r') as f:
+                        content = f.read()
+                    self.textbox_poscar.clear()
+                    self.textbox_poscar.insertPlainText(content)
+                except Exception as e:
+                    self.textbox_poscar.clear()
+                    self.textbox_poscar.insertPlainText(f"Error reading text file: {e}")
+
 
     def read_poscar(self):
         global Recent_used_directory
