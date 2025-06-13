@@ -57,6 +57,7 @@ class IncarGeneratorApp(QDialog, form_class):
             "ISPIN" : "2",
             "GGA" : "",
             "IVDW" : "",
+            "MAGMOM" : "",
 
             "# Write Flags" : None,
             "LWAVE" : ".FALSE.",
@@ -118,6 +119,20 @@ class IncarGeneratorApp(QDialog, form_class):
             "NCORE" : "1"
         }
         
+        #Magnetic Moments
+        lines = self.textbox_poscar.toPlainText().splitlines()
+        try:
+            fields = lines[6].split()
+        except IndexError:
+            fields = []
+        
+        if fields:
+            magmom = " ".join(f + "*0" for f in fields)
+            incar["MAGMOM"] = magmom
+        else:
+            pass
+
+
         if self.comboBox_2.currentText() in ["HSE"]:
             incar["ISTART"] = "0"
         else:
@@ -193,10 +208,10 @@ class IncarGeneratorApp(QDialog, form_class):
 
         if self.comboBox_2.currentText() == "Solvation":
             incar["IBRION"] = "2"
-            incar["NSW"] = "200"
-            incar["POTIM"] = "0.1"
-            incar["EDIFFG"] = "1E-4"
-            incar["EDIFF"] = "1E-5"
+            incar["NSW"] = "1000"
+            incar["POTIM"] = "0.5"
+            incar["EDIFFG"] = "1E-5"
+            incar["EDIFF"] = "1E-6"
             incar["LSOL"] = ".TRUE."
             incar["ISOL"] = "2"
             incar["C_MOLAR"] = "0.01"
