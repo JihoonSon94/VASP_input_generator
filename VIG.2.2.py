@@ -109,6 +109,12 @@ class IncarGeneratorApp(QDialog, form_class):
             "LDAUJ" : "",
             "LMAXMIX" : "",
 
+            " NEB" : None,
+            "ICHAIN" : "",
+            "IMAGES" : "",
+            "LCLIMB" : "",
+            "IOPT"   : "",
+
             "# HSE" : None,
             "LHFCALC" : "",
             "HFSCREEN" : "",
@@ -175,6 +181,8 @@ class IncarGeneratorApp(QDialog, form_class):
         
         if self.comboBox_1.currentText() == "Molecule":
             incar["ALGO"] = "Normal"
+            incar["LDIPOL"] = ".TRUE."
+            incar["IDIPOL"] = "4"
         elif self.comboBox_2.currentText() == "HSE":
             incar["ALGO"] = "Damped"
         else:
@@ -423,9 +431,7 @@ class IncarGeneratorApp(QDialog, form_class):
 
     def write_kpoints(self):
         input_value = float(self.kpoints_resolution.text())
-        lattcie_parameter_x = self.textbox_poscar.toPlainText().splitlines()[2].split()
-        lattcie_parameter_y = self.textbox_poscar.toPlainText().splitlines()[3].split()
-        lattcie_parameter_z = self.textbox_poscar.toPlainText().splitlines()[4].split()
+        
         if input_value < 0:
             QMessageBox.warning(self, "Error", "K-Spacing Value must be greater than 0.")
             return
@@ -434,13 +440,13 @@ class IncarGeneratorApp(QDialog, form_class):
             kpoints_y = 1
             kpoints_z = 1
         else:
+            lattcie_parameter_x = self.textbox_poscar.toPlainText().splitlines()[2].split()
+            lattcie_parameter_y = self.textbox_poscar.toPlainText().splitlines()[3].split()
+            lattcie_parameter_z = self.textbox_poscar.toPlainText().splitlines()[4].split()
             kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
             kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
             kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
-        #kpoints_x = round(1 / (math.sqrt(float(lattcie_parameter_x[0])**2 + float(lattcie_parameter_x[1])**2 + float(lattcie_parameter_x[2])**2)) / input_value)
-        #kpoints_y = round(1 / (math.sqrt(float(lattcie_parameter_y[0])**2 + float(lattcie_parameter_y[1])**2 + float(lattcie_parameter_y[2])**2)) / input_value)
-        #kpoints_z = round(1 / (math.sqrt(float(lattcie_parameter_z[0])**2 + float(lattcie_parameter_z[1])**2 + float(lattcie_parameter_z[2])**2)) / input_value)
-        
+
         kpoints = (
             f"K-Spacing Value: {input_value}\n"
             f"0\n"
