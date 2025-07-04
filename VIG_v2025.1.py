@@ -109,7 +109,7 @@ class IncarGeneratorApp(QDialog, form_class):
             "LDAUJ" : "",
             "LMAXMIX" : "",
 
-            " NEB" : None,
+            "# NEB" : None,
             "ICHAIN" : "",
             "IMAGES" : "",
             "LCLIMB" : "",
