@@ -7,6 +7,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from ase.io import read, write
+from ase.gui.gui import GUI
 
 Desktop_directory = os.path.expanduser('~') + "/Desktop"
 Recent_used_directory = Desktop_directory
@@ -351,16 +352,13 @@ class IncarGeneratorApp(QDialog, form_class):
         total_num_of_atom = sum([int(num) for num in number_of_each_atoms])
 
         if len(lines) > 7 and lines[7].lower().startswith("s" or "S"):
-            # Replace line 8 with "Selective dynamics"
             lines[7] = "Selective dynamics"
         else:
-            # Insert "Selective dynamics" at line 8
             lines.insert(7, "Selective dynamics")
 
         input_value = float(self.z_value.text())
         position_range = total_num_of_atom + 9
 
-        # Modify atom positions based on z_value
         for i in range(9, position_range):
             atom_position_list = lines[i].split()
             atom_position_string = ""
@@ -420,10 +418,15 @@ class IncarGeneratorApp(QDialog, form_class):
     def structure_view(self):
         structure_content = self.textbox_poscar.toPlainText()
         structure_io = StringIO(structure_content)
-        visualize = read(structure_io, format='vasp')
-        visualize.edit()
+        
+        initial = read(structure_io, format='vasp')
+        gui = GUI(images=[initial])
+        gui.run()
+
+        final = gui.atoms
+
         output = StringIO()
-        write(output, visualize, format='vasp')
+        write(output, final, format='vasp')
         vasp_content = output.getvalue()
         self.textbox_poscar.clear()
         self.textbox_poscar.insertPlainText(vasp_content)
