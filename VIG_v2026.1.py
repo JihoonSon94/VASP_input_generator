@@ -6,6 +6,7 @@ from io import StringIO
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
+from ase import Atoms
 from ase.io import read, write
 from ase.gui.gui import GUI
 
@@ -49,6 +50,7 @@ class IncarGeneratorApp(QDialog, form_class):
 
     def apply_incar_value(self):
         self.textbox_incar.clear()
+        calculation_type = self.calculation_type_comoboBox.currentText()
         incar = {
             "# General" : 1,
             "PREC" : "Accurate",
@@ -111,10 +113,11 @@ class IncarGeneratorApp(QDialog, form_class):
             "LMAXMIX" : "",
 
             "# NEB" : None,
-            "ICHAIN" : "",
             "IMAGES" : "",
-            "LCLIMB" : "",
             "IOPT"   : "",
+            "ICHAIN" : "",
+            "LCLIMB" : "",
+            "TIMESTEP" : "",
 
             "# HSE" : None,
             "LHFCALC" : "",
@@ -140,12 +143,12 @@ class IncarGeneratorApp(QDialog, form_class):
             pass
 
 
-        if self.comboBox_2.currentText() in ["HSE"]:
+        if calculation_type in ["HSE"]:
             incar["ISTART"] = "0"
         else:
             incar["ISTART"] = "0"
 
-        if self.comboBox_2.currentText() == "HSE":
+        if calculation_type == "HSE":
             incar["ICHARG"] = "11"
         else:
             incar["ICHARG"] = "2"
@@ -168,7 +171,7 @@ class IncarGeneratorApp(QDialog, form_class):
         
 
         if self.comboBox_1.currentText() == "Surface":
-            if not self.comboBox_2.currentText() == "Solvation":
+            if calculation_type != "Solvation":
                 incar["LDIPOL"] = ".TRUE."
                 incar["IDIPOL"] = "3"
             incar["LVHAR"] = ".TRUE."
@@ -184,7 +187,7 @@ class IncarGeneratorApp(QDialog, form_class):
             incar["ALGO"] = "Normal"
             incar["LDIPOL"] = ".TRUE."
             incar["IDIPOL"] = "4"
-        elif self.comboBox_2.currentText() == "HSE":
+        elif calculation_type == "HSE":
             incar["ALGO"] = "Damped"
         else:
             incar["ALGO"] = "Fast"
@@ -192,30 +195,40 @@ class IncarGeneratorApp(QDialog, form_class):
         cut_off_energy_value = self.cut_off_energy.value()
         incar["ENCUT"] = cut_off_energy_value
 
-        if self.comboBox_2.currentText() == "Vibration":
+        if calculation_type == "Vibration":
             incar["MAXMIX"] = "60"
         else:
             pass
         
-        if self.comboBox_2.currentText() == "Relaxation":
+        if calculation_type == "Relaxation":
             incar["IBRION"] = "2"
             incar["NSW"] = "2000"
             incar["POTIM"] = "0.5"
             incar["EDIFFG"] = "1E-5"
             incar["EDIFF"] = "1E-6"
-        elif self.comboBox_2.currentText() == "Vibration":
+        elif calculation_type == "Vibration":
             incar["IBRION"] = "5"
             incar["NSW"] = "2000"
             incar["POTIM"] = "0.015"
             incar["EDIFFG"] = "1E-6"
             incar["NFREE"] = "2"
+        elif calculation_type == "NEB":
+            incar["IOPT"] = "3"
+            incar["ICHAIN"] = "0"
+            incar["IMAGES"] = "3"
+            incar["LCLIMB"] = ".TRUE."
+            incar["TIMESTEP"] = "0.05"
+            incar["IBRION"] = "3"
+            incar["NSW"] = "2000"
+            incar["POTIM"] = "0"
+            incar["EDIFFG"] = "-0.05"
         else:
             incar["IBRION"] = ""
             incar["NSW"] = "0"
 
 
 
-        if self.comboBox_2.currentText() == "Solvation":
+        if calculation_type == "Solvation":
             incar["IBRION"] = "2"
             incar["NSW"] = "1000"
             incar["POTIM"] = "0.5"
@@ -230,7 +243,7 @@ class IncarGeneratorApp(QDialog, form_class):
         
 
 
-        if self.comboBox_2.currentText() == "HSE":
+        if calculation_type == "HSE":
             incar["LHFCALC"] = ".TRUE."
             incar["HFSCREEN"] = "0.2"
             incar["TIME"] = "0.4"
@@ -385,8 +398,21 @@ class IncarGeneratorApp(QDialog, form_class):
         read_textbox_poscar = self.textbox_poscar.toPlainText()
         temp_vasp_type_file = StringIO(read_textbox_poscar)
         temp_ase = read(temp_vasp_type_file, format='vasp')
+        chemical_symbols = temp_ase.get_chemical_symbols()
+        z_positions = temp_ase.get_positions()[:, 2]
+        symbol_order = {}
+
+        for symbol in chemical_symbols:
+            if symbol not in symbol_order:
+                symbol_order[symbol] = len(symbol_order)
+
+        sorted_indices = sorted(
+            range(len(temp_ase)),
+            key=lambda idx: (symbol_order[chemical_symbols[idx]], z_positions[idx])
+        )
+        sorted_atoms = temp_ase[sorted_indices]
         sorted_poscar = StringIO()
-        write(sorted_poscar, temp_ase, format='vasp', sort = True)
+        write(sorted_poscar, sorted_atoms, format='vasp', sort=False)
         sorted_poscar_content = sorted_poscar.getvalue()
         self.textbox_poscar.clear()
         self.textbox_poscar.setPlainText(sorted_poscar_content)
@@ -416,14 +442,21 @@ class IncarGeneratorApp(QDialog, form_class):
 
 
     def structure_view(self):
-        structure_content = self.textbox_poscar.toPlainText()
-        structure_io = StringIO(structure_content)
-        
-        initial = read(structure_io, format='vasp')
+        structure_content = self.textbox_poscar.toPlainText().strip()
+
+        if structure_content:
+            initial = read(StringIO(structure_content), format='vasp')
+        else:
+            initial = Atoms()
+
         gui = GUI(images=[initial])
         gui.run()
 
         final = gui.atoms
+
+        if len(final) == 0:
+            self.textbox_poscar.clear()
+            return
 
         output = StringIO()
         write(output, final, format='vasp')
