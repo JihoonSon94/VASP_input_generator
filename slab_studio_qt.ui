@@ -1,0 +1,985 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SlabStudioMainWindow</class>
+ <widget class="QMainWindow" name="SlabStudioMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1820</width>
+    <height>1120</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Slab Studio Qt</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>10</number>
+    </property>
+    <property name="topMargin">
+     <number>10</number>
+    </property>
+    <property name="rightMargin">
+     <number>10</number>
+    </property>
+    <property name="bottomMargin">
+     <number>10</number>
+    </property>
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="mainSplitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QScrollArea" name="leftScrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="leftScrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>500</width>
+          <height>1500</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="leftPanelLayout">
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <property name="spacing">
+          <number>14</number>
+         </property>
+         <item>
+          <widget class="QGroupBox" name="structureGroupBox">
+           <property name="title">
+            <string>1) Structure</string>
+           </property>
+           <property name="toolTip">
+            <string>Load a demo structure or import a file before surface generation.</string>
+           </property>
+           <layout class="QFormLayout" name="structureFormLayout">
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="sourceModeLabel">
+              <property name="text">
+               <string>Source</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="sourceModeCombo"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="demoLabel">
+              <property name="text">
+               <string>Demo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="demoCombo"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="filePathLabel">
+              <property name="text">
+               <string>File</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="fileRowLayout">
+              <item>
+               <widget class="QLineEdit" name="filePathEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="browseButton">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="parserLabel">
+              <property name="text">
+               <string>Parser</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="parserCombo"/>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QCheckBox" name="useConventionalCheckBox">
+              <property name="text">
+               <string>Use conventional standard cell</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="symprecLabel">
+              <property name="text">
+               <string>symprec</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDoubleSpinBox" name="symprecSpin"/>
+            </item>
+            <item row="6" column="0" colspan="2">
+             <widget class="QPushButton" name="loadButton">
+              <property name="text">
+               <string>Load / Refresh Structure</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="facetGroupBox">
+           <property name="title">
+            <string>2) Facet</string>
+           </property>
+           <property name="toolTip">
+            <string>Choose a symmetry-reduced Miller index or enter one manually.</string>
+           </property>
+           <layout class="QFormLayout" name="facetFormLayout">
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="facetModeLabel">
+              <property name="text">
+               <string>Facet mode</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="facetModeCombo"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="maxIndexLabel">
+              <property name="text">
+               <string>Max |hkl|</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="maxIndexSpin"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="facetLabel">
+              <property name="text">
+               <string>Facet</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="facetCombo"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="manualHklLabel">
+              <property name="text">
+               <string>Manual hkl</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <layout class="QHBoxLayout" name="manualHklLayout">
+              <item>
+               <widget class="QLabel" name="hLabel">
+                <property name="text">
+                 <string>h</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="hSpin"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="kLabel">
+                <property name="text">
+                 <string>k</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="kSpin"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="lLabel">
+                <property name="text">
+                 <string>l</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="lSpin"/>
+              </item>
+             </layout>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QPushButton" name="refreshFacetsButton">
+              <property name="text">
+               <string>Refresh Facets</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="builderGroupBox">
+           <property name="title">
+            <string>3) Slab Builder</string>
+           </property>
+           <property name="toolTip">
+            <string>Generator parameters live here; preview-only settings are grouped below.</string>
+           </property>
+           <layout class="QFormLayout" name="builderFormLayout">
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="thicknessModeLabel">
+              <property name="text">
+               <string>Thickness mode</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="thicknessModeCombo"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="planeCountLabel">
+              <property name="text">
+               <string>Plane count</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="planeCountSpin"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="slabThicknessLabel">
+              <property name="text">
+               <string>Slab thickness (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="slabThicknessSpin"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="vacuumLabel">
+              <property name="text">
+               <string>Vacuum (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QDoubleSpinBox" name="vacuumSpin"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="terminationModeLabel">
+              <property name="text">
+               <string>Termination mode</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="terminationModeCombo"/>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="customShiftLabel">
+              <property name="text">
+               <string>Custom shift</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QDoubleSpinBox" name="customShiftSpin"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="optionsLabel">
+              <property name="text">
+               <string>Options</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <layout class="QVBoxLayout" name="optionsLayout">
+              <item>
+               <widget class="QCheckBox" name="primitiveCheckBox">
+                <property name="text">
+                 <string>Primitive reduction</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="centerCheckBox">
+                <property name="text">
+                 <string>Center slab in vacuum</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="lllCheckBox">
+                <property name="text">
+                 <string>LLL reduce lattice</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="symmetrizeCheckBox">
+                <property name="text">
+                 <string>Force symmetric slab</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="filterSymCheckBox">
+                <property name="text">
+                 <string>Filter duplicate symmetric terminations</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="maxNormalSearchLabel">
+              <property name="text">
+               <string>max_normal_search</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QSpinBox" name="maxNormalSearchSpin"/>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="ftolLabel">
+              <property name="text">
+               <string>ftol (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QDoubleSpinBox" name="ftolSpin"/>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="tolLabel">
+              <property name="text">
+               <string>tol</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QDoubleSpinBox" name="tolSpin"/>
+            </item>
+            <item row="10" column="0" colspan="2">
+             <widget class="QPushButton" name="generateButton">
+              <property name="text">
+               <string>Generate Slabs</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="previewGroupBox">
+           <property name="title">
+            <string>4) Preview + Export</string>
+           </property>
+           <property name="toolTip">
+            <string>Repeat, camera, highlighting and export controls for the selected slab.</string>
+           </property>
+           <layout class="QFormLayout" name="previewFormLayout">
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="repeatLabel">
+              <property name="text">
+               <string>Repeat</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <layout class="QHBoxLayout" name="repeatLayout">
+              <item>
+               <widget class="QLabel" name="repALabel">
+                <property name="text">
+                 <string>a</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="repASpin"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="repBLabel">
+                <property name="text">
+                 <string>b</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="repBSpin"/>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="QCheckBox" name="orthogonalizeCheckBox">
+              <property name="text">
+               <string>Orthogonalize c before export</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="markerScaleLabel">
+              <property name="text">
+               <string>Marker scale</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="markerScaleSpin"/>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="cameraLabel">
+              <property name="text">
+               <string>Camera</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="cameraCombo"/>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QCheckBox" name="showCellCheckBox">
+              <property name="text">
+               <string>Show unit cell</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="2">
+             <widget class="QCheckBox" name="showBondsCheckBox">
+              <property name="text">
+               <string>Show heuristic bond lines</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="layerToleranceLabel">
+              <property name="text">
+               <string>Layer tolerance (A)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QDoubleSpinBox" name="layerToleranceSpin"/>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="surfaceDepthLabel">
+              <property name="text">
+               <string>Surface depth</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QSpinBox" name="surfaceDepthSpin"/>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="fixedLayersLabel">
+              <property name="text">
+               <string>Fixed bottom layers</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QSpinBox" name="fixedBottomLayersSpin"/>
+            </item>
+            <item row="9" column="0" colspan="2">
+             <layout class="QGridLayout" name="exportButtonsLayout">
+              <item row="0" column="0">
+               <widget class="QPushButton" name="openPreviewButton">
+               <property name="text">
+                 <string>Refresh Preview</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="exportCifButton">
+                <property name="text">
+                 <string>Export CIF</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="exportPoscarButton">
+                <property name="text">
+                 <string>Export POSCAR</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QPushButton" name="exportFixedPoscarButton">
+                <property name="text">
+                 <string>Export Fixed POSCAR</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="leftVerticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="rightPanel">
+       <layout class="QVBoxLayout" name="rightPanelLayout">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <property name="spacing">
+         <number>12</number>
+        </property>
+        <item>
+         <widget class="QFrame" name="infoFrame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="infoGridLayout">
+           <property name="leftMargin">
+            <number>8</number>
+           </property>
+           <property name="topMargin">
+            <number>8</number>
+           </property>
+           <property name="rightMargin">
+            <number>8</number>
+           </property>
+           <property name="bottomMargin">
+            <number>8</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>14</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="formulaTitleLabel">
+             <property name="text">
+              <string>Formula:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="formulaValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="sitesTitleLabel">
+             <property name="text">
+              <string>Sites:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QLabel" name="sitesValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="spaceGroupTitleLabel">
+             <property name="text">
+              <string>Space group:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QLabel" name="spaceGroupValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="facetTitleLabel">
+             <property name="text">
+              <string>Facet:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="facetValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="activeSlabTitleLabel">
+             <property name="text">
+              <string>Active slab:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QLabel" name="activeSlabValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QLabel" name="shiftTitleLabel">
+             <property name="text">
+              <string>Shift:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5">
+            <widget class="QLabel" name="shiftValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="atomsTitleLabel">
+             <property name="text">
+              <string>Atoms:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="atomsValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="layersTitleLabel">
+             <property name="text">
+              <string>Layers~:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="QLabel" name="layersValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QLabel" name="vacuumTitleLabel">
+             <property name="text">
+              <string>Vacuum (A):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5">
+            <widget class="QLabel" name="vacuumValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="topSurfaceTitleLabel">
+             <property name="text">
+              <string>Top surface:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="topSurfaceValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLabel" name="bottomSurfaceTitleLabel">
+             <property name="text">
+              <string>Bottom surface:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="bottomSurfaceValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="4">
+            <widget class="QLabel" name="slabThicknessTitleLabel">
+             <property name="text">
+              <string>Slab thickness (A):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="5">
+            <widget class="QLabel" name="slabThicknessValueLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="previewGroupBoxRight">
+          <property name="title">
+           <string>Preview</string>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>640</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Interactive preview area. The Python code can embed WebEngine here when available.</string>
+          </property>
+          <layout class="QVBoxLayout" name="previewRightLayout">
+           <property name="leftMargin">
+            <number>8</number>
+           </property>
+           <property name="topMargin">
+            <number>8</number>
+           </property>
+           <property name="rightMargin">
+            <number>8</number>
+           </property>
+           <property name="bottomMargin">
+            <number>8</number>
+           </property>
+           <property name="spacing">
+            <number>8</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="previewStatusLabel">
+             <property name="text">
+              <string>Preview status</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="previewHostFrame">
+             <property name="minimumSize">
+              <size>
+               <width>860</width>
+               <height>560</height>
+              </size>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Sunken</enum>
+             </property>
+              <layout class="QVBoxLayout" name="previewHostLayout">
+               <property name="leftMargin">
+                <number>4</number>
+               </property>
+               <property name="topMargin">
+                <number>4</number>
+               </property>
+               <property name="rightMargin">
+                <number>4</number>
+               </property>
+               <property name="bottomMargin">
+                <number>4</number>
+               </property>
+              </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTabWidget" name="tabs">
+          <widget class="QWidget" name="terminationsTab">
+           <attribute name="title">
+            <string>Terminations</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="terminationsTabLayout">
+            <property name="leftMargin">
+             <number>8</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>8</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QTableWidget" name="terminationTable"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="layersTab">
+           <attribute name="title">
+            <string>Layers</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="layersTabLayout">
+            <property name="leftMargin">
+             <number>8</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>8</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <property name="spacing">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="layerSummaryLabel">
+              <property name="text">
+               <string>Layer summary</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="layerSummaryTable"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="siteTableLabel">
+              <property name="text">
+               <string>Layer-resolved sites</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTableWidget" name="siteTable"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="logTab">
+           <attribute name="title">
+            <string>Log</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="logTabLayout">
+            <property name="leftMargin">
+             <number>8</number>
+            </property>
+            <property name="topMargin">
+             <number>8</number>
+            </property>
+            <property name="rightMargin">
+             <number>8</number>
+            </property>
+            <property name="bottomMargin">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QPlainTextEdit" name="logBox"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
