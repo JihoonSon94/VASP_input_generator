@@ -14,8 +14,9 @@ Desktop_directory = os.path.expanduser('~') + "/Desktop"
 Recent_used_directory = Desktop_directory
 new_file_name = ''
 
-ui_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'main.ui')
-form_class = uic.loadUiType(ui_path)[0]
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+main_ui_path = os.path.join(BASE_DIR, 'main.ui')
+form_class = uic.loadUiType(main_ui_path)[0]
 
 def suppress_qt_warnings():
     environ["QT_DEVICE_PIXEL_RATIO"] = "0"
@@ -31,7 +32,10 @@ class IncarGeneratorApp(QDialog, form_class):
         
         self.view_button.clicked.connect(self.structure_view)
         self.save_poscar_button.clicked.connect(self.save_poscar)
-        self.sort_ion_button.clicked.connect(self.sort_ion)
+        self.sort_x_button.clicked.connect(lambda: self.sort_atoms_by_axis(0))
+        self.sort_y_button.clicked.connect(lambda: self.sort_atoms_by_axis(1))
+        self.sort_z_button.clicked.connect(lambda: self.sort_atoms_by_axis(2))
+        self.sort_button.clicked.connect(self.sort_ions)
         self.incar_option_apply_button.clicked.connect(self.apply_incar_value)
         self.reset_coordinate_button.clicked.connect(self.reset_coordinate)
 
@@ -322,29 +326,61 @@ class IncarGeneratorApp(QDialog, form_class):
         else:
             event.ignore()
 
+    def create_message_box(self, icon, title, text, informative_text=""):
+        message_box = QMessageBox(self)
+        message_box.setIcon(icon)
+        message_box.setWindowTitle(title)
+        message_box.setText(text)
+
+        if informative_text:
+            message_box.setInformativeText(informative_text)
+
+        return message_box
+
+    def show_warning(self, title, text, informative_text=""):
+        message_box = self.create_message_box(QMessageBox.Warning, title, text, informative_text)
+        message_box.setStandardButtons(QMessageBox.Ok)
+        message_box.exec_()
+
+    def show_information(self, title, text, informative_text=""):
+        message_box = self.create_message_box(QMessageBox.Information, title, text, informative_text)
+        message_box.setStandardButtons(QMessageBox.Ok)
+        message_box.exec_()
+
+    def set_poscar_from_atoms(self, atoms, sort_atoms=True):
+        output = StringIO()
+        write(output, atoms, format='vasp', direct=False, sort=sort_atoms)
+        self.textbox_poscar.clear()
+        self.textbox_poscar.setPlainText(output.getvalue())
+
+    def load_text_file_to_poscar(self, file_path):
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as file:
+            content = file.read()
+        self.textbox_poscar.clear()
+        self.textbox_poscar.insertPlainText(content)
+
     def drop_for_read_poscar(self, event):
         for url in event.mimeData().urls():
             file_path = url.toLocalFile()
             clean_path = file_path.strip('{}')
             ext = os.path.splitext(clean_path)[-1].lower()
 
-            if ext in ['.cif', '.vasp']:
+            if ext == '.cif':
                 try:
-                    atoms = read(clean_path)
-                    output = StringIO()
-                    write(output, atoms, format='vasp')
-                    vasp_content = output.getvalue()
+                    atoms = read(clean_path, format='cif')
+                    self.set_poscar_from_atoms(atoms)
+                except Exception as e:
                     self.textbox_poscar.clear()
-                    self.textbox_poscar.insertPlainText(vasp_content)
+                    self.textbox_poscar.insertPlainText(f"Error reading structured file: {e}")
+            elif ext == '.vasp':
+                try:
+                    self.load_text_file_to_poscar(clean_path)
                 except Exception as e:
                     self.textbox_poscar.clear()
                     self.textbox_poscar.insertPlainText(f"Error reading structured file: {e}")
             else:
                 try:
-                    with open(clean_path, 'r') as f:
-                        content = f.read()
-                    self.textbox_poscar.clear()
-                    self.textbox_poscar.insertPlainText(content)
+                    self.load_text_file_to_poscar(clean_path)
                 except Exception as e:
                     self.textbox_poscar.clear()
                     self.textbox_poscar.insertPlainText(f"Error reading text file: {e}")
@@ -352,11 +388,18 @@ class IncarGeneratorApp(QDialog, form_class):
 
     def read_poscar(self):
         global Recent_used_directory
-        filename, _ = QFileDialog.getOpenFileName(self, "Open POSCAR File", Recent_used_directory, "VASP files (*.vasp);;All files (*.*)")
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Structure File",
+            Recent_used_directory,
+            "Structure files (*.vasp *.cif);;VASP files (*.vasp);;CIF files (*.cif);;All files (*.*)",
+        )
         if filename:
-            with open(filename, 'r') as file:
-                file_content = file.read()
-            self.textbox_poscar.setText(file_content)
+            if filename.lower().endswith('.cif'):
+                atoms = read(filename, format='cif')
+                self.set_poscar_from_atoms(atoms)
+            else:
+                self.load_text_file_to_poscar(filename)
             Recent_used_directory = os.path.dirname(filename)
 
     def fix_atoms(self):
@@ -394,12 +437,54 @@ class IncarGeneratorApp(QDialog, form_class):
         self.textbox_poscar.setPlainText(updated_text)
 
 
-    def sort_ion(self):
+    def sort_atoms_by_axis(self, axis_index):
+        atom_group_sizes = self.get_atom_group_sizes()
+        read_textbox_poscar = self.textbox_poscar.toPlainText()
+        temp_vasp_type_file = StringIO(read_textbox_poscar)
+        temp_ase = read(temp_vasp_type_file, format='vasp')
+        axis_positions = temp_ase.get_positions()[:, axis_index]
+
+        if not atom_group_sizes or sum(atom_group_sizes) != len(temp_ase):
+            self.show_warning("Error", "Could not identify the current atom groups in POSCAR.")
+            return
+
+        sorted_indices = []
+        start_index = 0
+
+        for group_size in atom_group_sizes:
+            group_indices = list(range(start_index, start_index + group_size))
+            sorted_indices.extend(sorted(group_indices, key=lambda idx: axis_positions[idx]))
+            start_index += group_size
+
+        sorted_atoms = temp_ase[sorted_indices]
+        sorted_poscar = StringIO()
+        write(sorted_poscar, sorted_atoms, format='vasp', sort=False)
+        sorted_poscar_content = sorted_poscar.getvalue()
+        self.textbox_poscar.clear()
+        self.textbox_poscar.setPlainText(sorted_poscar_content)
+
+    def get_atom_group_sizes(self):
+        lines = self.textbox_poscar.toPlainText().splitlines()
+
+        for line_index in [6, 5]:
+            if len(lines) <= line_index:
+                continue
+
+            try:
+                atom_group_sizes = [int(num) for num in lines[line_index].split()]
+            except ValueError:
+                continue
+
+            if atom_group_sizes:
+                return atom_group_sizes
+
+        return None
+
+    def sort_ions(self):
         read_textbox_poscar = self.textbox_poscar.toPlainText()
         temp_vasp_type_file = StringIO(read_textbox_poscar)
         temp_ase = read(temp_vasp_type_file, format='vasp')
         chemical_symbols = temp_ase.get_chemical_symbols()
-        z_positions = temp_ase.get_positions()[:, 2]
         symbol_order = {}
 
         for symbol in chemical_symbols:
@@ -408,7 +493,7 @@ class IncarGeneratorApp(QDialog, form_class):
 
         sorted_indices = sorted(
             range(len(temp_ase)),
-            key=lambda idx: (symbol_order[chemical_symbols[idx]], z_positions[idx])
+            key=lambda idx: (symbol_order[chemical_symbols[idx]], idx)
         )
         sorted_atoms = temp_ase[sorted_indices]
         sorted_poscar = StringIO()
@@ -469,7 +554,7 @@ class IncarGeneratorApp(QDialog, form_class):
         input_value = float(self.kpoints_resolution.text())
         
         if input_value < 0:
-            QMessageBox.warning(self, "Error", "K-Spacing Value must be greater than 0.")
+            self.show_warning("Error", "K-Spacing Value must be greater than 0.")
             return
         elif input_value == 0:
             kpoints_x = 1
@@ -523,7 +608,7 @@ class IncarGeneratorApp(QDialog, form_class):
             file_name_without_ext = os.path.splitext(file_name)[0]
             save_path = os.path.join(os.path.dirname(file_path), file_name_without_ext + '.vasp')
             write(save_path, atoms, format='vasp', direct=False, sort=True)
-            print(f"File saved as {save_path}")
+            self.show_information("Saved", f"File saved as\n{save_path}")
 
 
     def convert_vasp2cif(self, file_path):
