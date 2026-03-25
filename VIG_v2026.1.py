@@ -529,25 +529,33 @@ class IncarGeneratorApp(QDialog, form_class):
     def structure_view(self):
         structure_content = self.textbox_poscar.toPlainText().strip()
 
-        if structure_content:
-            initial = read(StringIO(structure_content), format='vasp')
-        else:
-            initial = Atoms()
+        try:
+            if structure_content:
+                initial = read(StringIO(structure_content), format='vasp')
+            else:
+                initial = Atoms()
+        except Exception as exc:
+            self.show_warning("Error", "Failed to parse the current POSCAR text.", str(exc))
+            return
 
-        gui = GUI(images=[initial])
-        gui.run()
-
-        final = gui.atoms
+        try:
+            gui = GUI(images=[initial])
+            gui.run()
+            final = gui.atoms
+        except Exception as exc:
+            self.show_warning(
+                "ASE GUI Error",
+                "ASE visualize window did not return a valid edited structure.",
+                str(exc),
+            )
+            return
 
         if len(final) == 0:
             self.textbox_poscar.clear()
             return
 
-        output = StringIO()
-        write(output, final, format='vasp')
-        vasp_content = output.getvalue()
-        self.textbox_poscar.clear()
-        self.textbox_poscar.insertPlainText(vasp_content)
+        self.set_poscar_from_atoms(final, sort_atoms=False)
+        self.textbox_poscar.setFocus()
         
 
     def write_kpoints(self):
